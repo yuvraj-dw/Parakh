@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: bis_postgres
+    environment:
+      POSTGRES_USER: bis_user
+      POSTGRES_PASSWORD: bis_password
+      POSTGRES_DB: bis_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - bis_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bis_user -d bis_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: .
+    container_name: bis_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://bis_user:bis_password@postgres:5432/bis_db
+      - APP_ENV=development
+      - DEBUG=true
+      - JWT_SECRET=supersecretchangeinproduction1234567890
+      - ADMIN_API_KEY=bis-dev-admin-secret-key-32charsmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - .:/app
+
+volumes:
+  bis_pgdata:
