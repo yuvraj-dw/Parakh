@@ -14,6 +14,12 @@ from app.models.standard import (
     StandardVersion,
 )
 from app.models.user import User, UserRole
+from app.models.verification import (
+    VerificationRequest,
+    VerificationResult,
+    VerificationStatus,
+    VerificationType,
+)
 
 __all__ = [
     "AHCCentre",
@@ -38,6 +44,10 @@ __all__ = [
     "TimestampMixin",
     "User",
     "UserRole",
+    "VerificationRequest",
+    "VerificationResult",
+    "VerificationStatus",
+    "VerificationType",
 ]
 
 
