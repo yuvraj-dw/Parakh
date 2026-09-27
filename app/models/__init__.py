@@ -14,6 +14,7 @@ from app.models.standard import (
     StandardStatus,
     StandardVersion,
 )
+from app.models.sync import SyncError, SyncRun, SyncStatus
 from app.models.user import User, UserRole
 from app.models.verification import (
     VerificationRequest,
@@ -44,6 +45,9 @@ __all__ = [
     "StandardRelationshipType",
     "StandardStatus",
     "StandardVersion",
+    "SyncError",
+    "SyncRun",
+    "SyncStatus",
     "TimestampMixin",
     "User",
     "UserRole",
