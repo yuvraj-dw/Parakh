@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from app.models.base import Base, ProvenanceMixin, TimestampMixin
 from app.models.certification import CertificationScheme
+from app.models.hallmarking import AHCCentre, CentreStatus, Jeweller, JewellerStatus
+from app.models.laboratory import LabStatus, Laboratory, LaboratoryScope
 from app.models.product import Product, ProductStandardMapping
 from app.models.qco import QCO, QCOStatus
 from app.models.standard import (
@@ -14,8 +16,15 @@ from app.models.standard import (
 from app.models.user import User, UserRole
 
 __all__ = [
+    "AHCCentre",
     "Base",
+    "CentreStatus",
     "CertificationScheme",
+    "Jeweller",
+    "JewellerStatus",
+    "LabStatus",
+    "Laboratory",
+    "LaboratoryScope",
     "Product",
     "ProductStandardMapping",
     "ProvenanceMixin",
@@ -30,4 +39,5 @@ __all__ = [
     "User",
     "UserRole",
 ]
+
 
