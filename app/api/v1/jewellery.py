@@ -4,6 +4,7 @@ import base64
 from typing import Optional
 from fastapi import APIRouter, Depends, File, Request, UploadFile
 
+from app.core.exceptions import AppException
 from app.dependencies import get_vision_provider
 from app.integrations.vision.base import (
     AssayReportData,
@@ -12,6 +13,7 @@ from app.integrations.vision.base import (
 )
 
 router = APIRouter(prefix="/jewellery", tags=["Jewellery"])
+MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MB
 
 
 @router.post("/scan", response_model=JewelleryScanDetection)
@@ -35,6 +37,13 @@ async def scan_jewellery(
                 pass
         if not image_bytes:
             image_bytes = await request.body()
+
+    if len(image_bytes) > MAX_UPLOAD_SIZE:
+        raise AppException(
+            code="PAYLOAD_TOO_LARGE",
+            message="Uploaded file exceeds 10MB limit",
+            status_code=413
+        )
 
     return await provider.scan_jewellery_marks(image_bytes)
 
@@ -64,5 +73,12 @@ async def parse_assay_report(
                 pass
         if not file_bytes:
             file_bytes = await request.body()
+
+    if len(file_bytes) > MAX_UPLOAD_SIZE:
+        raise AppException(
+            code="PAYLOAD_TOO_LARGE",
+            message="Uploaded file exceeds 10MB limit",
+            status_code=413
+        )
 
     return await provider.parse_assay_report(file_bytes, mime_type=mime_type)

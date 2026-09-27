@@ -11,7 +11,12 @@ from app.core.exceptions import ForbiddenException, UnauthorizedException
 from app.core.security import decode_access_token
 from app.integrations.llm.mock_provider import MockLLMProvider
 from app.integrations.rag.mock_provider import MockRAGProvider
+from app.integrations.verification.base import BaseVerificationProvider
 from app.integrations.verification.mock_provider import MockVerificationProvider
+from app.integrations.verification.official_provider import (
+    BISOfficialApiProvider,
+    OfficialRedirectProvider,
+)
 from app.integrations.vision.base import BaseVisionProvider
 from app.integrations.vision.mock_provider import MockVisionProvider
 from app.models.user import User, UserRole
@@ -102,7 +107,14 @@ async def get_current_admin(
 
 
 def get_verification_service() -> VerificationService:
-    return VerificationService(provider=MockVerificationProvider())
+    provider_type = (settings.VERIFICATION_PROVIDER or "mock").lower()
+    if provider_type == "redirect":
+        provider: BaseVerificationProvider = OfficialRedirectProvider()
+    elif provider_type == "official":
+        provider = BISOfficialApiProvider()
+    else:
+        provider = MockVerificationProvider()
+    return VerificationService(provider=provider)
 
 
 def get_vision_provider() -> BaseVisionProvider:
