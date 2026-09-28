@@ -30,10 +30,18 @@ class Settings(BaseSettings):
 
     LLM_PROVIDER: str = "mock"
     LLM_API_KEY: Optional[str] = None
+    LLM_BASE_URL: Optional[str] = "http://127.0.0.1:8045/v1"
+    LLM_MODEL: str = "gemini-3.8-flash-high"
+    GOOGLE_REFRESH_TOKEN: Optional[str] = None
+    GOOGLE_PROJECT_ID: str = "aicode-consumers"
+    GOOGLE_CLIENT_ID: Optional[str] = None
+    GOOGLE_CLIENT_SECRET: Optional[str] = None
     RAG_PROVIDER: str = "mock"
     RAG_BASE_URL: Optional[str] = None
     VERIFICATION_PROVIDER: str = "mock"
     VISION_PROVIDER: str = "mock"
+    VISION_BASE_URL: Optional[str] = "http://127.0.0.1:8045/v1"
+    VISION_MODEL: str = "gemini-3.8-flash-high"
 
 
 @lru_cache()

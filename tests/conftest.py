@@ -38,3 +38,9 @@ def override_get_db():
     app.dependency_overrides[get_db] = _test_get_db
     yield
     app.dependency_overrides.pop(get_db, None)
+
+
+@pytest.fixture
+async def db_session() -> AsyncGenerator[AsyncSession, None]:
+    async with test_async_session_maker() as session:
+        yield session

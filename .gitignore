@@ -8,5 +8,16 @@ venv/
 *.egg-info/
 dist/
 build/
+docs/
+plan.md
 .superpowers/
+account.json
+accounts.json
+upload_to_vps.py
+deploy_vps.py
+configure_services.py
+setup_ssl.py
+sync_to_vps.py
+*.json.backup
+
 

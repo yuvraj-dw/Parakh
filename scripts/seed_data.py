@@ -149,5 +149,11 @@ async def seed(session_factory: Optional[async_sessionmaker[AsyncSession]] = Non
         logger.info("Seed data applied successfully!")
 
 
+async def main():
+    await seed()
+    from app.dependencies import engine
+    await engine.dispose()
+
+
 if __name__ == "__main__":
-    asyncio.run(seed())
+    asyncio.run(main())
