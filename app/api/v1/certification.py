@@ -55,13 +55,36 @@ async def map_product(
     stmt = select(Product)
     products = (await db.execute(stmt)).scalars().all()
     matched_prod: Product | None = None
-    for p in products:
-        words = p.name.lower().split()
-        if any(w in desc for w in words if len(w) > 3):
-            matched_prod = p
-            break
+    best_score = 0
 
-    if matched_prod:
+    stop_words = {
+        "with",
+        "from",
+        "that",
+        "this",
+        "under",
+        "into",
+        "over",
+        "some",
+        "more",
+        "product",
+        "goods",
+    }
+    for p in products:
+        p_name = p.name.lower()
+        score = 0
+        if p_name in desc:
+            score += 100
+        words = [w for w in p_name.split() if len(w) > 3 and w not in stop_words]
+        for w in words:
+            if w in desc:
+                score += len(w) * 2
+
+        if score > best_score:
+            best_score = score
+            matched_prod = p
+
+    if matched_prod and best_score > 0:
         m_stmt = select(ProductStandardMapping).where(
             ProductStandardMapping.product_id == matched_prod.id
         )
@@ -88,13 +111,14 @@ async def map_product(
                     else "Scheme-I (ISI Mark)"
                 )
             )
+            confidence = min(0.98, max(0.85, 0.85 + (best_score / 200) * 0.13))
             return {
                 "candidate_standard": std.is_number if std else "IS 17803:2022",
                 "standard_title": std.title if std else matched_prod.name,
                 "is_mandatory": mapping.is_mandatory,
                 "applicable_qco": qco.title if qco else "N/A",
                 "certification_scheme": scheme_name,
-                "confidence": 0.95,
+                "confidence": round(confidence, 2),
                 "reasoning": f"Description matches specifications for {matched_prod.name} under {std.is_number if std else ''}.",
             }
 

@@ -148,7 +148,7 @@ class MockVerificationProvider(BaseVerificationProvider):
 
         # 2. Deterministic generator for any 6-digit alphanumeric HUID
         # Uses hash to give consistent details for the same HUID
-        h_val = int(hashlib.md5(clean.encode()).hexdigest(), 16)
+        h_val = int(hashlib.md5(clean.encode(), usedforsecurity=False).hexdigest(), 16)
         jwl = JEWELLER_POOL[h_val % len(JEWELLER_POOL)]
         art = ARTICLE_TYPES[(h_val // 7) % len(ARTICLE_TYPES)]
 

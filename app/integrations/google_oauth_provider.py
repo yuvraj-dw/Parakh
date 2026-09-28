@@ -28,6 +28,15 @@ DEFAULT_ENDPOINTS = [
     "https://cloudcode-pa.googleapis.com/v1internal:generateContent",
 ]
 
+_shared_http_client: Optional[httpx.AsyncClient] = None
+
+
+async def get_shared_http_client(timeout: float = 45.0) -> httpx.AsyncClient:
+    global _shared_http_client
+    if _shared_http_client is None or _shared_http_client.is_closed:
+        _shared_http_client = httpx.AsyncClient(timeout=timeout)
+    return _shared_http_client
+
 
 class GoogleOAuthTokenManager:
     """Manages auto-refreshing OAuth access tokens using a refresh token."""
@@ -49,21 +58,21 @@ class GoogleOAuthTokenManager:
         if self.access_token and time.time() < (self.expires_at - 60):
             return self.access_token
 
-        async with httpx.AsyncClient(timeout=15.0) as client:
-            resp = await client.post(
-                "https://oauth2.googleapis.com/token",
-                data={
-                    "client_id": self.client_id,
-                    "client_secret": self.client_secret,
-                    "refresh_token": self.refresh_token,
-                    "grant_type": "refresh_token",
-                },
-            )
-            resp.raise_for_status()
-            data = resp.json()
-            self.access_token = data["access_token"]
-            self.expires_at = time.time() + data.get("expires_in", 3600)
-            return self.access_token
+        client = await get_shared_http_client(timeout=15.0)
+        resp = await client.post(
+            "https://oauth2.googleapis.com/token",
+            data={
+                "client_id": self.client_id,
+                "client_secret": self.client_secret,
+                "refresh_token": self.refresh_token,
+                "grant_type": "refresh_token",
+            },
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        self.access_token = data["access_token"]
+        self.expires_at = time.time() + data.get("expires_in", 3600)
+        return self.access_token
 
 
 class GoogleOAuthLLMProvider(BaseLLMProvider):
@@ -95,22 +104,22 @@ class GoogleOAuthLLMProvider(BaseLLMProvider):
             "request": {"contents": contents},
         }
 
-        async with httpx.AsyncClient(timeout=45.0) as client:
-            for url in DEFAULT_ENDPOINTS:
-                try:
-                    resp = await client.post(url, json=payload, headers=headers)
-                    if resp.status_code == 200:
-                        data = resp.json()
-                        candidates = data.get("response", data).get("candidates", [])
-                        text_parts = []
-                        for c in candidates:
-                            for p in c.get("content", {}).get("parts", []):
-                                if "text" in p:
-                                    text_parts.append(p["text"])
-                        return "".join(text_parts).strip()
-                    logger.warning(f"Google OAuth API {url} status {resp.status_code}: {resp.text[:100]}")
-                except Exception as e:
-                    logger.warning(f"Google OAuth API attempt failed on {url}: {e}")
+        client = await get_shared_http_client(timeout=45.0)
+        for url in DEFAULT_ENDPOINTS:
+            try:
+                resp = await client.post(url, json=payload, headers=headers)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    candidates = data.get("response", data).get("candidates", [])
+                    text_parts = []
+                    for c in candidates:
+                        for p in c.get("content", {}).get("parts", []):
+                            if "text" in p:
+                                text_parts.append(p["text"])
+                    return "".join(text_parts).strip()
+                logger.warning(f"Google OAuth API {url} status {resp.status_code}: {resp.text[:100]}")
+            except Exception as e:
+                logger.warning(f"Google OAuth API attempt failed on {url}: {e}")
 
         # Fallback if both endpoints error
         return "Bureau of Indian Standards (BIS) regulates national standards, certifications, and laboratory conformity in India."
@@ -209,21 +218,21 @@ class GoogleOAuthVisionProvider(BaseVisionProvider):
             "request": {"contents": contents},
         }
 
-        async with httpx.AsyncClient(timeout=45.0) as client:
-            for url in DEFAULT_ENDPOINTS:
-                try:
-                    resp = await client.post(url, json=payload, headers=headers)
-                    if resp.status_code == 200:
-                        data = resp.json()
-                        candidates = data.get("response", data).get("candidates", [])
-                        text_parts = []
-                        for c in candidates:
-                            for p in c.get("content", {}).get("parts", []):
-                                if "text" in p:
-                                    text_parts.append(p["text"])
-                        return "".join(text_parts).strip()
-                except Exception as e:
-                    logger.warning(f"Google OAuth Vision API error on {url}: {e}")
+        client = await get_shared_http_client(timeout=45.0)
+        for url in DEFAULT_ENDPOINTS:
+            try:
+                resp = await client.post(url, json=payload, headers=headers)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    candidates = data.get("response", data).get("candidates", [])
+                    text_parts = []
+                    for c in candidates:
+                        for p in c.get("content", {}).get("parts", []):
+                            if "text" in p:
+                                text_parts.append(p["text"])
+                    return "".join(text_parts).strip()
+            except Exception as e:
+                logger.warning(f"Google OAuth Vision API error on {url}: {e}")
 
         return "{}"
 
