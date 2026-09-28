@@ -1,4 +1,4 @@
-"""Generate a comprehensive, publication-grade Backend Integration Guide PDF
+"""Generate an exhaustive, publication-grade Backend Integration Guide & Complete Mock Data Reference PDF
 for Frontend and RAG engineers working on PARAKH (BIS Intelligent Assistant).
 """
 import os
@@ -35,7 +35,7 @@ class NumberedCanvas(canvas.Canvas):
         
         # Header (pages > 1)
         if self._pageNumber > 1:
-            self.drawString(54, 755, "PARAKH (BIS Intelligent Assistant) - Backend Integration Guide")
+            self.drawString(54, 755, "PARAKH (BIS Intelligent Assistant) - Backend Integration Guide & Mock Data Reference")
             self.drawRightString(558, 755, "Confidential - For Internal Dev Teams")
             self.setStrokeColor(colors.HexColor("#cbd5e1"))
             self.setLineWidth(0.5)
@@ -45,7 +45,7 @@ class NumberedCanvas(canvas.Canvas):
         self.setStrokeColor(colors.HexColor("#cbd5e1"))
         self.setLineWidth(0.5)
         self.line(54, 45, 558, 45)
-        self.drawString(54, 32, "Production API: https://bis.hizru.me | Base: /api/v1 | OpenAPI Docs: /docs")
+        self.drawString(54, 32, "Production API: https://bis.hizru.me | Base: /api/v1 | Docs: https://bis.hizru.me/docs")
         self.drawRightString(558, 32, f"Page {self._pageNumber} of {page_count}")
         self.restoreState()
 
@@ -65,7 +65,7 @@ def create_backend_guide(output_pdf_path: str):
     # Custom styles
     primary_color = colors.HexColor("#0f172a") # Dark Slate / Navy
     accent_blue = colors.HexColor("#1e40af")
-    accent_amber = colors.HexColor("#b45309")
+    accent_teal = colors.HexColor("#0f766e")
     card_bg = colors.HexColor("#f8fafc")
     code_bg = colors.HexColor("#0f172a")
 
@@ -73,31 +73,31 @@ def create_backend_guide(output_pdf_path: str):
         'DocTitle',
         parent=styles['Normal'],
         fontName='Helvetica-Bold',
-        fontSize=24,
-        leading=28,
+        fontSize=20,
+        leading=24,
         textColor=primary_color,
-        spaceAfter=6,
+        spaceAfter=3,
     )
 
     subtitle_style = ParagraphStyle(
         'DocSubtitle',
         parent=styles['Normal'],
         fontName='Helvetica',
-        fontSize=12,
-        leading=16,
+        fontSize=10,
+        leading=14,
         textColor=colors.HexColor("#475569"),
-        spaceAfter=15,
+        spaceAfter=10,
     )
 
     h1_style = ParagraphStyle(
         'Heading1_Custom',
         parent=styles['Normal'],
         fontName='Helvetica-Bold',
-        fontSize=15,
-        leading=19,
+        fontSize=12,
+        leading=16,
         textColor=accent_blue,
-        spaceBefore=14,
-        spaceAfter=6,
+        spaceBefore=10,
+        spaceAfter=5,
         keepWithNext=True,
     )
 
@@ -105,10 +105,10 @@ def create_backend_guide(output_pdf_path: str):
         'Heading2_Custom',
         parent=styles['Normal'],
         fontName='Helvetica-Bold',
-        fontSize=11,
-        leading=15,
+        fontSize=9.5,
+        leading=13,
         textColor=colors.HexColor("#1e293b"),
-        spaceBefore=10,
+        spaceBefore=8,
         spaceAfter=4,
         keepWithNext=True,
     )
@@ -117,30 +117,30 @@ def create_backend_guide(output_pdf_path: str):
         'Body_Custom',
         parent=styles['Normal'],
         fontName='Helvetica',
-        fontSize=8.5,
-        leading=12.5,
+        fontSize=8,
+        leading=11.5,
         textColor=colors.HexColor("#334155"),
-        spaceAfter=6,
+        spaceAfter=4,
     )
 
     bullet_style = ParagraphStyle(
         'Bullet_Custom',
         parent=styles['Normal'],
         fontName='Helvetica',
-        fontSize=8.5,
-        leading=12,
+        fontSize=8,
+        leading=11.5,
         textColor=colors.HexColor("#334155"),
-        leftIndent=14,
-        firstLineIndent=-10,
-        spaceAfter=3,
+        leftIndent=12,
+        firstLineIndent=-8,
+        spaceAfter=2.5,
     )
 
     code_style = ParagraphStyle(
         'Code_Custom',
         parent=styles['Normal'],
         fontName='Courier',
-        fontSize=7.5,
-        leading=10.5,
+        fontSize=7,
+        leading=9.5,
         textColor=colors.HexColor("#f1f5f9"),
     )
 
@@ -148,8 +148,8 @@ def create_backend_guide(output_pdf_path: str):
         'TableHeader',
         parent=styles['Normal'],
         fontName='Helvetica-Bold',
-        fontSize=8,
-        leading=10,
+        fontSize=7.2,
+        leading=9.2,
         textColor=colors.white,
     )
 
@@ -157,8 +157,8 @@ def create_backend_guide(output_pdf_path: str):
         'TableCell',
         parent=styles['Normal'],
         fontName='Helvetica',
-        fontSize=7.5,
-        leading=9.5,
+        fontSize=7.0,
+        leading=9.0,
         textColor=colors.HexColor("#1e293b"),
     )
 
@@ -166,19 +166,20 @@ def create_backend_guide(output_pdf_path: str):
         'TableCellCode',
         parent=styles['Normal'],
         fontName='Courier',
-        fontSize=7.5,
-        leading=9.5,
+        fontSize=6.8,
+        leading=8.8,
         textColor=colors.HexColor("#0f172a"),
     )
 
     story = []
 
-    # Title Banner Block
+    # ==========================================
+    # PAGE 1: TITLE, META, ARCHITECTURE, GOTCHAS
+    # ==========================================
     story.append(Paragraph("PARAKH: BIS INTELLIGENT ASSISTANT", title_style))
-    story.append(Paragraph("The Complete Backend Engineering, Integration, & Architecture Guide for Frontend & RAG Teams", subtitle_style))
-    story.append(HRFlowable(width="100%", thickness=2, color=accent_blue, spaceBefore=0, spaceAfter=12))
+    story.append(Paragraph("Complete Backend Architecture, Integration Guide & Mock Dataset Reference for Frontend & RAG Teams", subtitle_style))
+    story.append(HRFlowable(width="100%", thickness=1.5, color=accent_blue, spaceBefore=0, spaceAfter=8))
 
-    # Meta Table (Quick Facts)
     meta_data = [
         [
             Paragraph("<b>Production VPS</b>", table_cell),
@@ -204,13 +205,13 @@ def create_backend_guide(output_pdf_path: str):
         ('BACKGROUND', (0,0), (-1,-1), card_bg),
         ('BOX', (0,0), (-1,-1), 0.5, colors.HexColor("#cbd5e1")),
         ('INNERGRID', (0,0), (-1,-1), 0.5, colors.HexColor("#e2e8f0")),
-        ('TOPPADDING', (0,0), (-1,-1), 4),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 4),
+        ('TOPPADDING', (0,0), (-1,-1), 2.5),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 2.5),
     ]))
     story.append(t_meta)
-    story.append(Spacer(1, 12))
+    story.append(Spacer(1, 8))
 
-    # System Architecture Summary
+    # Architecture Overview
     story.append(Paragraph("1. System Architecture & Component Interaction", h1_style))
     story.append(Paragraph(
         "Parakh is an asynchronous FastAPI orchestration engine designed to support BIS standard discovery, regulatory "
@@ -221,7 +222,7 @@ def create_backend_guide(output_pdf_path: str):
 
     arch_box = [
         [Paragraph(
-            "<font color='#38bdf8'><b>Frontend Client (Web/Mobile)</b></font><br/>"
+            "<font color='#38bdf8'><b>Frontend Client (Web / Mobile)</b></font><br/>"
             "- Swagger / OpenAPI UI: <code>/docs</code><br/>"
             "- JSON REST over HTTPS<br/>"
             "- Stores & sends <code>conversation_id</code> for multi-turn chat<br/>"
@@ -258,22 +259,37 @@ def create_backend_guide(output_pdf_path: str):
         ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#f1f5f9")),
         ('BOX', (0,0), (-1,-1), 1, colors.HexColor("#94a3b8")),
         ('INNERGRID', (0,0), (-1,-1), 0.5, colors.HexColor("#cbd5e1")),
-        ('TOPPADDING', (0,0), (-1,-1), 6),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+        ('TOPPADDING', (0,0), (-1,-1), 4),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 4),
     ]))
     story.append(t_arch)
-    story.append(Spacer(1, 14))
+    story.append(Spacer(1, 8))
 
-    # SECTION 2: FRONTEND GUIDE
-    story.append(Paragraph("2. Frontend Integration Guide (APIs, Payloads, & Test Triggers)", h1_style))
+    # Gotchas
+    story.append(Paragraph("2. Critical Gotchas, Edge Cases, & Integration Rules", h1_style))
+    gotchas = [
+        ("Multi-turn Chat State", "The frontend MUST store the <code>conversation_id</code> returned in the first message response and pass it in subsequent turns. Omitting <code>conversation_id</code> creates an isolated conversation with zero historical memory."),
+        ("Always Use HTTPS", "Always call <code>https://bis.hizru.me</code>. Do NOT send requests to <code>http://45.82.161.10</code> because Cloudflare handles SSL termination and plain HTTP to the IP will be blocked or drop headers."),
+        ("Standard Error Envelope", "All 4xx/5xx responses adhere to: <code>{ 'error': { 'code': '...', 'message': '...', 'correlation_id': '...' } }</code>. Use <code>error.message</code> for toasts in frontend."),
+        ("Verification Priority", "When verifying a licence (<code>POST /verification/licence</code>), the system checks the local PostgreSQL <code>jewellers</code> table FIRST. Jeweller licences resolve as <code>LOCAL_DATABASE_REGISTRY</code> with 100% reliability."),
+        ("Image & Document Upload Limit", "Endpoints <code>/jewellery/scan</code> and <code>/jewellery/assay-report</code> accept a maximum payload of 15MB. Ensure client-side image compression before upload to conserve mobile bandwidth."),
+        ("Autonomous AI Token Refresh", "The VPS backend automatically refreshes its Google OAuth bearer token 60 seconds before expiration. Developers never need to manually generate or paste Google access tokens."),
+    ]
+    for title, desc in gotchas:
+        story.append(Paragraph(f"- <b>{title}</b>: {desc}", bullet_style))
+
+    # ==========================================
+    # PAGE 2: FRONTEND APIS & CURL SNIPPETS
+    # ==========================================
+    story.append(PageBreak())
+
+    story.append(Paragraph("3. Frontend Integration Guide (APIs & Contract Matrix)", h1_style))
     story.append(Paragraph(
         "All API endpoints are hosted at <code>https://bis.hizru.me/api/v1</code>. CORS is globally enabled for all origins, "
         "methods, and headers. Below is the complete contract for frontend integration:",
         body_style
     ))
 
-    # API Directory Table
-    story.append(Paragraph("Core API Endpoints Matrix", h2_style))
     endpoints_data = [
         [
             Paragraph("Method & Route", table_header),
@@ -378,86 +394,36 @@ def create_backend_guide(output_pdf_path: str):
         ('BACKGROUND', (0,0), (-1,0), accent_blue),
         ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor("#cbd5e1")),
         ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, card_bg]),
-        ('TOPPADDING', (0,0), (-1,-1), 3),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 3),
+        ('TOPPADDING', (0,0), (-1,-1), 2),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 2),
     ]))
     story.append(t_endpoints)
-    story.append(Spacer(1, 10))
+    story.append(Spacer(1, 8))
 
-    # Page Break for clean section separation
+    story.append(Paragraph("Interactive cURL Verification Commands", h2_style))
+    curl_examples = (
+        "# 1. Test Verification of Authentic Gold HUID\n"
+        "curl -X POST https://bis.hizru.me/api/v1/verification/huid -H 'Content-Type: application/json' -d '{\"huid\": \"GLD916\"}'\n\n"
+        "# 2. Test Intelligent Product Mapping\n"
+        "curl -X POST https://bis.hizru.me/api/v1/certification/map-product -H 'Content-Type: application/json' -d '{\"description\": \"Motorcycle helmet\"}'\n\n"
+        "# 3. Test Multi-Turn Chat Conversation\n"
+        "curl -X POST https://bis.hizru.me/api/v1/chat -H 'Content-Type: application/json' -d '{\"message\": \"What are the rules for gold hallmarking?\"}'"
+    )
+    t_curl = Table([[Paragraph(f"<pre>{curl_examples}</pre>", code_style)]], colWidths=[504])
+    t_curl.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,-1), code_bg),
+        ('TOPPADDING', (0,0), (-1,-1), 4),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 4),
+        ('LEFTPADDING', (0,0), (-1,-1), 8),
+    ]))
+    story.append(t_curl)
+
+    # ==========================================
+    # PAGE 3: GUIDE FOR RAG & AI ENGINEERING
+    # ==========================================
     story.append(PageBreak())
 
-    # Frontend Test Data Cheatsheet
-    story.append(Paragraph("Frontend Test Triggers & Mock Cheatsheet", h2_style))
-    story.append(Paragraph(
-        "To allow frontend developers to test all visual states (Success, Badges, Error banners, Expired badges, and "
-        "Alert popups), the backend provides deterministic mock triggers:",
-        body_style
-    ))
-
-    huid_test_data = [
-        [
-            Paragraph("Input Code", table_header),
-            Paragraph("Expected Status", table_header),
-            Paragraph("Jeweller / Details", table_header),
-            Paragraph("Frontend UI Test Purpose", table_header),
-        ],
-        [
-            Paragraph("<code>GLD916</code>", table_cell_code),
-            Paragraph("<font color='#16a34a'><b>VERIFIED</b></font>", table_cell),
-            Paragraph("Kalyan Heritage Gems | 22K Gold Bangles (42.5g)", table_cell),
-            Paragraph("Green verified badge, full article breakdown card", table_cell),
-        ],
-        [
-            Paragraph("<code>DIA750</code>", table_cell_code),
-            Paragraph("<font color='#16a34a'><b>VERIFIED</b></font>", table_cell),
-            Paragraph("Tanishq Retail Vault | 18K Solitaire Ring (5.45g)", table_cell),
-            Paragraph("Purity 750 (18K) display card with AHC badge", table_cell),
-        ],
-        [
-            Paragraph("<code>SIL925</code>", table_cell_code),
-            Paragraph("<font color='#16a34a'><b>VERIFIED</b></font>", table_cell),
-            Paragraph("Johri Bazaar Jewels | Sterling Silver Thali (450g)", table_cell),
-            Paragraph("Silver hallmarking verification view", table_cell),
-        ],
-        [
-            Paragraph("<code>EXP999</code>", table_cell_code),
-            Paragraph("<font color='#d97706'><b>EXPIRED</b></font>", table_cell),
-            Paragraph("Royal Heritage Jewels (Registration lapsed)", table_cell),
-            Paragraph("Yellow/Amber warning badge ('Hallmark validity expired')", table_cell),
-        ],
-        [
-            Paragraph("<code>NOTF00</code>", table_cell_code),
-            Paragraph("<font color='#dc2626'><b>NOT_FOUND</b></font>", table_cell),
-            Paragraph("Record not in BIS database", table_cell),
-            Paragraph("Red alert badge ('Counterfeit or unauthorized hallmark warning')", table_cell),
-        ],
-        [
-            Paragraph("<code>ERR500</code>", table_cell_code),
-            Paragraph("<font color='#dc2626'><b>ERROR</b></font>", table_cell),
-            Paragraph("Simulated upstream provider failure", table_cell),
-            Paragraph("Retry / connection error toast in UI", table_cell),
-        ],
-        [
-            Paragraph("<i>Any other 6 chars</i><br/>(e.g. <code>M89K2P</code>)", table_cell),
-            Paragraph("<font color='#16a34a'><b>VERIFIED</b></font>", table_cell),
-            Paragraph("Dynamically partitioned against registered jeweller pool", table_cell),
-            Paragraph("Allows evaluator to enter any random code during live demo", table_cell),
-        ],
-    ]
-    t_huid = Table(huid_test_data, colWidths=[90, 85, 175, 154])
-    t_huid.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,0), accent_blue),
-        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor("#cbd5e1")),
-        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, card_bg]),
-        ('TOPPADDING', (0,0), (-1,-1), 3),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 3),
-    ]))
-    story.append(t_huid)
-    story.append(Spacer(1, 14))
-
-    # SECTION 3: RAG FRIEND GUIDE
-    story.append(Paragraph("3. Guide for RAG & AI Engineering Team", h1_style))
+    story.append(Paragraph("4. Guide for RAG & AI Engineering Team", h1_style))
     story.append(Paragraph(
         "Parakh separates the retrieval engine, the orchestration pipeline, and the generative model into modular interfaces. "
         "This allows the RAG team to drop in real vector stores (e.g. Qdrant, Pinecone, or pgvector) without altering the API.",
@@ -474,7 +440,7 @@ def create_backend_guide(output_pdf_path: str):
         "6. <b>Citation Synthesis & Persistence</b>: Both user question and assistant answer are saved to DB. Citations are returned in the response envelope.",
         bullet_style
     ))
-    story.append(Spacer(1, 6))
+    story.append(Spacer(1, 4))
 
     story.append(Paragraph("The Exact <code>RAGChunk</code> Schema Contract", h2_style))
     story.append(Paragraph(
@@ -495,12 +461,12 @@ def create_backend_guide(output_pdf_path: str):
     t_chunk_code = Table([[Paragraph(f"<pre>{chunk_code}</pre>", code_style)]], colWidths=[504])
     t_chunk_code.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,-1), code_bg),
-        ('TOPPADDING', (0,0), (-1,-1), 6),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+        ('TOPPADDING', (0,0), (-1,-1), 5),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 5),
         ('LEFTPADDING', (0,0), (-1,-1), 8),
     ]))
     story.append(t_chunk_code)
-    story.append(Spacer(1, 8))
+    story.append(Spacer(1, 6))
 
     story.append(Paragraph("How to Wire a Real Vector Store (Zero-Downtime Swap)", h2_style))
     story.append(Paragraph(
@@ -521,55 +487,687 @@ def create_backend_guide(output_pdf_path: str):
     t_rag_code = Table([[Paragraph(f"<pre>{rag_swap_code}</pre>", code_style)]], colWidths=[504])
     t_rag_code.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,-1), code_bg),
-        ('TOPPADDING', (0,0), (-1,-1), 6),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+        ('TOPPADDING', (0,0), (-1,-1), 5),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 5),
         ('LEFTPADDING', (0,0), (-1,-1), 8),
     ]))
     story.append(t_rag_code)
-    story.append(Spacer(1, 14))
 
-    # SECTION 4: GOTCHAS & CATCH-UPS
-    story.append(Paragraph("4. Critical Gotchas, Edge Cases, & Integration Rules", h1_style))
-    
-    gotchas = [
-        ("Multi-turn Chat State", "The frontend MUST store the <code>conversation_id</code> returned in the first message response and pass it in subsequent turns. Omitting <code>conversation_id</code> creates an isolated conversation with zero historical memory."),
-        ("Always Use HTTPS", "Always call <code>https://bis.hizru.me</code>. Do NOT send requests to <code>http://45.82.161.10</code> because Cloudflare handles SSL termination and plain HTTP to the IP will be blocked or drop headers."),
-        ("Standard Error Envelope", "All 4xx/5xx responses adhere to: <code>{ 'error': { 'code': '...', 'message': '...', 'correlation_id': '...' } }</code>. Use <code>error.message</code> for toasts in frontend."),
-        ("Verification Priority", "When verifying a licence (<code>POST /verification/licence</code>), the system checks the local PostgreSQL <code>jewellers</code> table FIRST. Jeweller licences resolve as <code>LOCAL_DATABASE_REGISTRY</code> with 100% reliability."),
-        ("Image & Document Upload Limit", "Endpoints <code>/jewellery/scan</code> and <code>/jewellery/assay-report</code> accept a maximum payload of 15MB. Ensure client-side image compression before upload to conserve mobile bandwidth."),
-        ("Autonomous AI Token Refresh", "The VPS backend automatically refreshes its Google OAuth bearer token 60 seconds before expiration. Developers never need to manually generate or paste Google access tokens."),
+    # ==========================================
+    # PAGE 4: MOCK STANDARDS & QCOS
+    # ==========================================
+    story.append(PageBreak())
+
+    story.append(Paragraph("5. Complete Mock Dataset: Standards & Quality Control Orders", h1_style))
+    story.append(Paragraph(
+        "Below is the complete catalog of Indian Standards and QCOs seeded into the database, available for search and filtering:",
+        body_style
+    ))
+
+    story.append(Paragraph("5.1 Indian Standards (12 Live Standards)", h2_style))
+    standards_rows = [
+        [
+            Paragraph("IS Number", table_header),
+            Paragraph("Standard Title", table_header),
+            Paragraph("Year", table_header),
+            Paragraph("Status", table_header),
+            Paragraph("Scope / Regulatory Focus", table_header),
+        ],
+        [
+            Paragraph("<code>IS 1417:2016</code>", table_cell_code),
+            Paragraph("Gold & Gold Alloys, Jewellery/Artefacts - Fineness & Marking", table_cell),
+            Paragraph("2016", table_cell),
+            Paragraph("<font color='#16a34a'>ACTIVE</font>", table_cell),
+            Paragraph("Purity grades (916, 750, 585) & hallmarking rules.", table_cell),
+        ],
+        [
+            Paragraph("<code>IS 2112:2014</code>", table_cell_code),
+            Paragraph("Silver & Silver Alloys, Jewellery/Artefacts - Fineness & Marking", table_cell),
+            Paragraph("2014", table_cell),
+            Paragraph("<font color='#16a34a'>ACTIVE</font>", table_cell),
+            Paragraph("Purity grades & hallmarking criteria for silver artefacts.", table_cell),
+        ],
+        [
+            Paragraph("<code>IS 17803:2022</code>", table_cell_code),
+            Paragraph("Stainless Steel Vacuum Insulated Flasks & Bottles", table_cell),
+            Paragraph("2022", table_cell),
+            Paragraph("<font color='#16a34a'>ACTIVE</font>", table_cell),
+            Paragraph("Thermal insulation, material safety, leak testing.", table_cell),
+        ],
+        [
+            Paragraph("<code>IS 1293:2019</code>", table_cell_code),
+            Paragraph("Plugs & Socket-Outlets for Domestic & Similar Purposes", table_cell),
+            Paragraph("2019", table_cell),
+            Paragraph("<font color='#16a34a'>ACTIVE</font>", table_cell),
+            Paragraph("Electrical safety, grounding contacts, 6A/16A specs.", table_cell),
+        ],
+        [
+            Paragraph("<code>IS 13252 (Part 1):2010</code>", table_cell_code),
+            Paragraph("Information Technology Equipment - Safety", table_cell),
+            Paragraph("2010", table_cell),
+            Paragraph("<font color='#16a34a'>ACTIVE</font>", table_cell),
+            Paragraph("Safety requirements for mains & battery IT hardware.", table_cell),
+        ],
+        [
+            Paragraph("<code>IS 16046 (Part 2):2018</code>", table_cell_code),
+            Paragraph("Secondary Lithium Cells & Batteries (Portable Sealed)", table_cell),
+            Paragraph("2018", table_cell),
+            Paragraph("<font color='#16a34a'>ACTIVE</font>", table_cell),
+            Paragraph("Overcharge, vibration, short circuit, safety tests.", table_cell),
+        ],
+        [
+            Paragraph("<code>IS 4151:2015</code>", table_cell_code),
+            Paragraph("Protective Helmets for Motorcycle Riders", table_cell),
+            Paragraph("2015", table_cell),
+            Paragraph("<font color='#16a34a'>ACTIVE</font>", table_cell),
+            Paragraph("Crash impact absorption, retention system, visor safety.", table_cell),
+        ],
+        [
+            Paragraph("<code>IS 14543:2004</code>", table_cell_code),
+            Paragraph("Packaged Drinking Water (Other than Natural Mineral)", table_cell),
+            Paragraph("2004", table_cell),
+            Paragraph("<font color='#16a34a'>ACTIVE</font>", table_cell),
+            Paragraph("Microbiological criteria, packaging, pesticide limits.", table_cell),
+        ],
+        [
+            Paragraph("<code>IS 9873 (Part 1):2019</code>", table_cell_code),
+            Paragraph("Safety of Toys - Mechanical & Physical Properties", table_cell),
+            Paragraph("2019", table_cell),
+            Paragraph("<font color='#16a34a'>ACTIVE</font>", table_cell),
+            Paragraph("Sharp edges, choking hazard, small parts testing.", table_cell),
+        ],
+        [
+            Paragraph("<code>IS 1786:2008</code>", table_cell_code),
+            Paragraph("High Strength Deformed Steel Bars (Fe 500D TMT)", table_cell),
+            Paragraph("2008", table_cell),
+            Paragraph("<font color='#16a34a'>ACTIVE</font>", table_cell),
+            Paragraph("Tensile strength, bendability, earthquake resistance.", table_cell),
+        ],
+        [
+            Paragraph("<code>IS 302 (Part 1):2008</code>", table_cell_code),
+            Paragraph("Safety of Household & Similar Electrical Appliances", table_cell),
+            Paragraph("2008", table_cell),
+            Paragraph("<font color='#16a34a'>ACTIVE</font>", table_cell),
+            Paragraph("Insulation resistance, heating, shock prevention.", table_cell),
+        ],
+        [
+            Paragraph("<code>IS 15820:2009</code>", table_cell_code),
+            Paragraph("Competence of Assaying & Hallmarking Centres (AHC)", table_cell),
+            Paragraph("2009", table_cell),
+            Paragraph("<font color='#16a34a'>ACTIVE</font>", table_cell),
+            Paragraph("Operational competence, calibration, fire assay accuracy.", table_cell),
+        ],
     ]
-
-    for title, desc in gotchas:
-        story.append(Paragraph(f"- <b>{title}</b>: {desc}", bullet_style))
-
-    story.append(Spacer(1, 14))
-
-    # SECTION 5: LIVE VERIFICATION & CURL EXAMPLES
-    story.append(Paragraph("5. Interactive cURL Verification Commands", h1_style))
-    story.append(Paragraph("Test endpoints directly from terminal or Postman:", body_style))
-
-    curl_examples = (
-        "# 1. Test Verification of Authentic Gold HUID\n"
-        "curl -X POST https://bis.hizru.me/api/v1/verification/huid \\\n"
-        "     -H 'Content-Type: application/json' -d '{\"huid\": \"GLD916\"}'\n\n"
-        "# 2. Test Intelligent Product Mapping\n"
-        "curl -X POST https://bis.hizru.me/api/v1/certification/map-product \\\n"
-        "     -H 'Content-Type: application/json' \\\n"
-        "     -d '{\"description\": \"Protective helmets for motorcycle riders\"}'\n\n"
-        "# 3. Test Multi-Turn Chat Conversation\n"
-        "curl -X POST https://bis.hizru.me/api/v1/chat \\\n"
-        "     -H 'Content-Type: application/json' \\\n"
-        "     -d '{\"message\": \"What are the mandatory marking rules for gold jewellery?\"}'"
-    )
-    t_curl = Table([[Paragraph(f"<pre>{curl_examples}</pre>", code_style)]], colWidths=[504])
-    t_curl.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,-1), code_bg),
-        ('TOPPADDING', (0,0), (-1,-1), 6),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 6),
-        ('LEFTPADDING', (0,0), (-1,-1), 8),
+    t_std = Table(standards_rows, colWidths=[90, 185, 30, 45, 154])
+    t_std.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), accent_blue),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor("#cbd5e1")),
+        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, card_bg]),
+        ('TOPPADDING', (0,0), (-1,-1), 2),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 2),
     ]))
-    story.append(t_curl)
+    story.append(t_std)
+    story.append(Spacer(1, 8))
+
+    story.append(Paragraph("5.2 Quality Control Orders (8 Live QCOs)", h2_style))
+    qco_rows = [
+        [
+            Paragraph("Gazette No.", table_header),
+            Paragraph("QCO Title", table_header),
+            Paragraph("Mandated Standard", table_header),
+            Paragraph("Responsible Ministry", table_header),
+            Paragraph("Effective Date", table_header),
+        ],
+        [
+            Paragraph("<code>S.O. 1234(E)</code>", table_cell_code),
+            Paragraph("Cookware and Utensils QCO, 2023", table_cell),
+            Paragraph("<code>IS 17803:2022</code>", table_cell_code),
+            Paragraph("Ministry of Commerce & Industry", table_cell),
+            Paragraph("2024-03-01 (<font color='#16a34a'>ACTIVE</font>)", table_cell),
+        ],
+        [
+            Paragraph("<code>S.O. 853(E)</code>", table_cell_code),
+            Paragraph("Toys (Quality Control) Order, 2020", table_cell),
+            Paragraph("<code>IS 9873 (Part 1):2019</code>", table_cell_code),
+            Paragraph("Ministry of Commerce & Industry", table_cell),
+            Paragraph("2021-01-01 (<font color='#16a34a'>ACTIVE</font>)", table_cell),
+        ],
+        [
+            Paragraph("<code>S.O. 4567(E)</code>", table_cell_code),
+            Paragraph("Plugs and Socket-Outlets QCO, 2021", table_cell),
+            Paragraph("<code>IS 1293:2019</code>", table_cell_code),
+            Paragraph("Ministry of Heavy Industries", table_cell),
+            Paragraph("2022-01-01 (<font color='#16a34a'>ACTIVE</font>)", table_cell),
+        ],
+        [
+            Paragraph("<code>S.O. 3211(E)</code>", table_cell_code),
+            Paragraph("Two Wheeler Helmet QCO, 2020", table_cell),
+            Paragraph("<code>IS 4151:2015</code>", table_cell_code),
+            Paragraph("Ministry of Road Transport", table_cell),
+            Paragraph("2021-06-01 (<font color='#16a34a'>ACTIVE</font>)", table_cell),
+        ],
+        [
+            Paragraph("<code>S.O. 982(E)</code>", table_cell_code),
+            Paragraph("Steel and Steel Products QCO, 2024", table_cell),
+            Paragraph("<code>IS 1786:2008</code>", table_cell_code),
+            Paragraph("Ministry of Steel", table_cell),
+            Paragraph("2024-07-01 (<font color='#16a34a'>ACTIVE</font>)", table_cell),
+        ],
+        [
+            Paragraph("<code>S.O. 2105(E)</code>", table_cell_code),
+            Paragraph("Bottled Water QCO, 2021", table_cell),
+            Paragraph("<code>IS 14543:2004</code>", table_cell_code),
+            Paragraph("Ministry of Consumer Affairs", table_cell),
+            Paragraph("2021-09-01 (<font color='#16a34a'>ACTIVE</font>)", table_cell),
+        ],
+        [
+            Paragraph("<code>S.O. 5621(E)</code>", table_cell_code),
+            Paragraph("Household Appliances Safety QCO, 2023", table_cell),
+            Paragraph("<code>IS 302 (Part 1):2008</code>", table_cell_code),
+            Paragraph("Ministry of Heavy Industries", table_cell),
+            Paragraph("2024-05-01 (<font color='#16a34a'>ACTIVE</font>)", table_cell),
+        ],
+        [
+            Paragraph("<code>S.O. 6712(E)</code>", table_cell_code),
+            Paragraph("Specialty Industrial Coatings QCO, 2026", table_cell),
+            Paragraph("<code>IS 17803:2022</code>", table_cell_code),
+            Paragraph("Ministry of Chemicals", table_cell),
+            Paragraph("2027-01-01 (<font color='#d97706'>UPCOMING</font>)", table_cell),
+        ],
+    ]
+    t_qco = Table(qco_rows, colWidths=[70, 160, 94, 115, 65])
+    t_qco.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), accent_blue),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor("#cbd5e1")),
+        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, card_bg]),
+        ('TOPPADDING', (0,0), (-1,-1), 2),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 2),
+    ]))
+    story.append(t_qco)
+
+    # ==========================================
+    # PAGE 5: LABORATORIES & AHC CENTRES
+    # ==========================================
+    story.append(PageBreak())
+
+    story.append(Paragraph("6. Complete Mock Dataset: Testing Labs & Assaying Centres", h1_style))
+    story.append(Paragraph(
+        "Below are the accredited testing laboratories and assaying & hallmarking centres available via directory endpoints:",
+        body_style
+    ))
+
+    story.append(Paragraph("6.1 BIS Recognized Testing Laboratories & Scopes (8 Labs)", h2_style))
+    lab_rows = [
+        [
+            Paragraph("Lab Code", table_header),
+            Paragraph("Laboratory Name", table_header),
+            Paragraph("Location", table_header),
+            Paragraph("Accredited IS Test Scopes", table_header),
+        ],
+        [
+            Paragraph("<code>BIS-LAB-DEL-01</code>", table_cell_code),
+            Paragraph("National Quality Testing Laboratory", table_cell),
+            Paragraph("New Delhi, Delhi", table_cell),
+            Paragraph("IS 17803:2022, IS 1293:2019, IS 14543:2004", table_cell),
+        ],
+        [
+            Paragraph("<code>BIS-LAB-MH-02</code>", table_cell_code),
+            Paragraph("Western Regional Testing Centre", table_cell),
+            Paragraph("Mumbai, Maharashtra", table_cell),
+            Paragraph("IS 1417:2016, IS 2112:2014, IS 1786:2008", table_cell),
+        ],
+        [
+            Paragraph("<code>BIS-LAB-KA-03</code>", table_cell_code),
+            Paragraph("Southern Electronics & Battery Test Lab", table_cell),
+            Paragraph("Bengaluru, Karnataka", table_cell),
+            Paragraph("IS 13252 (Part 1):2010, IS 16046 (Part 2):2018", table_cell),
+        ],
+        [
+            Paragraph("<code>BIS-LAB-TN-04</code>", table_cell_code),
+            Paragraph("Chennai Automotive & Safety Test Station", table_cell),
+            Paragraph("Chennai, Tamil Nadu", table_cell),
+            Paragraph("IS 4151:2015, IS 1293:2019", table_cell),
+        ],
+        [
+            Paragraph("<code>BIS-LAB-WB-05</code>", table_cell_code),
+            Paragraph("Eastern Metallurgical & Steel Evaluation Centre", table_cell),
+            Paragraph("Kolkata, West Bengal", table_cell),
+            Paragraph("IS 1786:2008, IS 17803:2022", table_cell),
+        ],
+        [
+            Paragraph("<code>BIS-LAB-GJ-06</code>", table_cell_code),
+            Paragraph("Gujarat Plastics & Polymer Testing Laboratory", table_cell),
+            Paragraph("Ahmedabad, Gujarat", table_cell),
+            Paragraph("IS 9873 (Part 1):2019, IS 14543:2004", table_cell),
+        ],
+        [
+            Paragraph("<code>BIS-LAB-RJ-07</code>", table_cell_code),
+            Paragraph("Jaipur Precious Metals & Minerals Facility", table_cell),
+            Paragraph("Jaipur, Rajasthan", table_cell),
+            Paragraph("IS 1417:2016, IS 2112:2014", table_cell),
+        ],
+        [
+            Paragraph("<code>BIS-LAB-TS-08</code>", table_cell_code),
+            Paragraph("Hyderabad Electrical Safety Testing Bureau", table_cell),
+            Paragraph("Hyderabad, Telangana", table_cell),
+            Paragraph("IS 302 (Part 1):2008, IS 1293:2019", table_cell),
+        ],
+    ]
+    t_lab = Table(lab_rows, colWidths=[90, 180, 104, 130])
+    t_lab.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), accent_blue),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor("#cbd5e1")),
+        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, card_bg]),
+        ('TOPPADDING', (0,0), (-1,-1), 2.5),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 2.5),
+    ]))
+    story.append(t_lab)
+    story.append(Spacer(1, 10))
+
+    story.append(Paragraph("6.2 Assaying & Hallmarking Centres (8 Recognized AHCs)", h2_style))
+    ahc_rows = [
+        [
+            Paragraph("Recognition No.", table_header),
+            Paragraph("AHC Centre Name", table_header),
+            Paragraph("Location", table_header),
+            Paragraph("Capabilities", table_header),
+        ],
+        [
+            Paragraph("<code>AHC-DL-001</code>", table_cell_code),
+            Paragraph("Central Assaying and Hallmarking Centre", table_cell),
+            Paragraph("New Delhi, Delhi", table_cell),
+            Paragraph("GOLD, SILVER (XRF + Fire Assay)", table_cell),
+        ],
+        [
+            Paragraph("<code>AHC-MH-002</code>", table_cell_code),
+            Paragraph("Zaveri Hallmarking Services", table_cell),
+            Paragraph("Mumbai, Maharashtra", table_cell),
+            Paragraph("GOLD, SILVER", table_cell),
+        ],
+        [
+            Paragraph("<code>AHC-GJ-003</code>", table_cell_code),
+            Paragraph("Surat Diamond & Gold Assaying Bureau", table_cell),
+            Paragraph("Surat, Gujarat", table_cell),
+            Paragraph("GOLD", table_cell),
+        ],
+        [
+            Paragraph("<code>AHC-KL-004</code>", table_cell_code),
+            Paragraph("Malabar Assaying & Hallmarking Complex", table_cell),
+            Paragraph("Thrissur, Kerala", table_cell),
+            Paragraph("GOLD, SILVER", table_cell),
+        ],
+        [
+            Paragraph("<code>AHC-RJ-005</code>", table_cell_code),
+            Paragraph("Rajasthan Heritage Assay Centre", table_cell),
+            Paragraph("Jaipur, Rajasthan", table_cell),
+            Paragraph("GOLD, SILVER", table_cell),
+        ],
+        [
+            Paragraph("<code>AHC-WB-006</code>", table_cell_code),
+            Paragraph("Bengal Bullion & Hallmarking Centre", table_cell),
+            Paragraph("Kolkata, West Bengal", table_cell),
+            Paragraph("GOLD, SILVER", table_cell),
+        ],
+        [
+            Paragraph("<code>AHC-TN-007</code>", table_cell_code),
+            Paragraph("Madurai Gold Assay Laboratory", table_cell),
+            Paragraph("Madurai, Tamil Nadu", table_cell),
+            Paragraph("GOLD", table_cell),
+        ],
+        [
+            Paragraph("<code>AHC-TS-008</code>", table_cell_code),
+            Paragraph("Deccan Precious Metals Testing Centre", table_cell),
+            Paragraph("Hyderabad, Telangana", table_cell),
+            Paragraph("GOLD, SILVER", table_cell),
+        ],
+    ]
+    t_ahc = Table(ahc_rows, colWidths=[90, 190, 114, 110])
+    t_ahc.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), accent_blue),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor("#cbd5e1")),
+        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, card_bg]),
+        ('TOPPADDING', (0,0), (-1,-1), 2.5),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 2.5),
+    ]))
+    story.append(t_ahc)
+
+    # ==========================================
+    # PAGE 6: JEWELLERS & SCHEMES
+    # ==========================================
+    story.append(PageBreak())
+
+    story.append(Paragraph("7. Complete Mock Dataset: Jewellers & Certification Schemes", h1_style))
+    story.append(Paragraph(
+        "Below are the registered jewellers with licence test statuses and official BIS certification schemes:",
+        body_style
+    ))
+
+    story.append(Paragraph("7.1 Registered Jewellers Directory (11 Seeded Jewellers)", h2_style))
+    jeweller_rows = [
+        [
+            Paragraph("Registration ID", table_header),
+            Paragraph("Jeweller Trade Name", table_header),
+            Paragraph("Location", table_header),
+            Paragraph("Metal", table_header),
+            Paragraph("Licence Status", table_header),
+        ],
+        [
+            Paragraph("<code>JWL-MH-1002</code>", table_cell_code),
+            Paragraph("Zaveri Jewellers Ltd", table_cell),
+            Paragraph("Mumbai, Maharashtra", table_cell),
+            Paragraph("GOLD", table_cell),
+            Paragraph("<font color='#16a34a'><b>VALID</b></font>", table_cell),
+        ],
+        [
+            Paragraph("<code>JWL-DL-2001</code>", table_cell_code),
+            Paragraph("Kalyan Heritage Gems", table_cell),
+            Paragraph("New Delhi, Delhi", table_cell),
+            Paragraph("GOLD", table_cell),
+            Paragraph("<font color='#16a34a'><b>VALID</b></font>", table_cell),
+        ],
+        [
+            Paragraph("<code>JWL-KA-3004</code>", table_cell_code),
+            Paragraph("Tanishq Retail Vault", table_cell),
+            Paragraph("Bengaluru, Karnataka", table_cell),
+            Paragraph("GOLD", table_cell),
+            Paragraph("<font color='#16a34a'><b>VALID</b></font>", table_cell),
+        ],
+        [
+            Paragraph("<code>JWL-KL-4005</code>", table_cell_code),
+            Paragraph("Malabar Ornaments Pvt Ltd", table_cell),
+            Paragraph("Kozhikode, Kerala", table_cell),
+            Paragraph("GOLD", table_cell),
+            Paragraph("<font color='#16a34a'><b>VALID</b></font>", table_cell),
+        ],
+        [
+            Paragraph("<code>JWL-GJ-5006</code>", table_cell_code),
+            Paragraph("Joyalukkas Trade Centre", table_cell),
+            Paragraph("Ahmedabad, Gujarat", table_cell),
+            Paragraph("GOLD", table_cell),
+            Paragraph("<font color='#16a34a'><b>VALID</b></font>", table_cell),
+        ],
+        [
+            Paragraph("<code>JWL-RJ-6007</code>", table_cell_code),
+            Paragraph("Johri Bazaar Jewels", table_cell),
+            Paragraph("Jaipur, Rajasthan", table_cell),
+            Paragraph("GOLD", table_cell),
+            Paragraph("<font color='#16a34a'><b>VALID</b></font>", table_cell),
+        ],
+        [
+            Paragraph("<code>JWL-WB-7008</code>", table_cell_code),
+            Paragraph("Senco Gold & Diamonds", table_cell),
+            Paragraph("Kolkata, West Bengal", table_cell),
+            Paragraph("GOLD", table_cell),
+            Paragraph("<font color='#16a34a'><b>VALID</b></font>", table_cell),
+        ],
+        [
+            Paragraph("<code>JWL-TN-8009</code>", table_cell_code),
+            Paragraph("GRT Jewellers Hub", table_cell),
+            Paragraph("Chennai, Tamil Nadu", table_cell),
+            Paragraph("GOLD", table_cell),
+            Paragraph("<font color='#16a34a'><b>VALID</b></font>", table_cell),
+        ],
+        [
+            Paragraph("<code>JWL-TS-9010</code>", table_cell_code),
+            Paragraph("Bhima Gold House", table_cell),
+            Paragraph("Hyderabad, Telangana", table_cell),
+            Paragraph("GOLD", table_cell),
+            Paragraph("<font color='#16a34a'><b>VALID</b></font>", table_cell),
+        ],
+        [
+            Paragraph("<code>JWL-EXP-9999</code>", table_cell_code),
+            Paragraph("Royal Heritage Jewels", table_cell),
+            Paragraph("Surat, Gujarat", table_cell),
+            Paragraph("GOLD", table_cell),
+            Paragraph("<font color='#d97706'><b>EXPIRED</b></font>", table_cell),
+        ],
+        [
+            Paragraph("<code>JWL-CAN-8888</code>", table_cell_code),
+            Paragraph("National Gems & Bullion Ltd", table_cell),
+            Paragraph("Kanpur, Uttar Pradesh", table_cell),
+            Paragraph("GOLD", table_cell),
+            Paragraph("<font color='#dc2626'><b>CANCELLED</b></font>", table_cell),
+        ],
+    ]
+    t_jew = Table(jeweller_rows, colWidths=[90, 180, 114, 45, 75])
+    t_jew.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), accent_blue),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor("#cbd5e1")),
+        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, card_bg]),
+        ('TOPPADDING', (0,0), (-1,-1), 2.5),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 2.5),
+    ]))
+    story.append(t_jew)
+    story.append(Spacer(1, 10))
+
+    story.append(Paragraph("7.2 Official BIS Certification Schemes (6 Schemes)", h2_style))
+    scheme_rows = [
+        [
+            Paragraph("Scheme Code", table_header),
+            Paragraph("Scheme Name", table_header),
+            Paragraph("Application Procedure & Scope Overview", table_header),
+        ],
+        [
+            Paragraph("<code>SCHEME_I</code>", table_cell_code),
+            Paragraph("Product Certification (ISI Mark)", table_cell),
+            Paragraph("Standard Mark licensing meeting Indian Standards. Requires factory audit & laboratory testing.", table_cell),
+        ],
+        [
+            Paragraph("<code>SCHEME_II</code>", table_cell_code),
+            Paragraph("Compulsory Registration (CRS)", table_cell),
+            Paragraph("Self-declaration of conformity for electronics & IT hardware based on accredited lab test reports.", table_cell),
+        ],
+        [
+            Paragraph("<code>SCHEME_III</code>", table_cell_code),
+            Paragraph("Certificate of Conformity (CoC)", table_cell),
+            Paragraph("Conformity assessment for lots and batches where continuous factory licensing is not viable.", table_cell),
+        ],
+        [
+            Paragraph("<code>SCHEME_IV</code>", table_cell_code),
+            Paragraph("Management Systems (MSCS)", table_cell),
+            Paragraph("ISO 9001 quality, ISO 14001 environmental, and ISO 22000 food safety certifications.", table_cell),
+        ],
+        [
+            Paragraph("<code>SCHEME_HALLMARK</code>", table_cell_code),
+            Paragraph("Hallmarking Scheme", table_cell),
+            Paragraph("Purity certification for 14K, 18K, 20K, 22K, 23K, and 24K gold and silver articles with 6-digit HUID.", table_cell),
+        ],
+        [
+            Paragraph("<code>SCHEME_ECO</code>", table_cell_code),
+            Paragraph("Eco Mark Scheme", table_cell),
+            Paragraph("Labelling of environmentally friendly consumer products meeting standards and MoEFCC ecological criteria.", table_cell),
+        ],
+    ]
+    t_sch = Table(scheme_rows, colWidths=[90, 150, 264])
+    t_sch.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), accent_blue),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor("#cbd5e1")),
+        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, card_bg]),
+        ('TOPPADDING', (0,0), (-1,-1), 2.5),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 2.5),
+    ]))
+    story.append(t_sch)
+
+    # ==========================================
+    # PAGE 7: PRODUCT MAPPINGS & HUID TEST SUITE
+    # ==========================================
+    story.append(PageBreak())
+
+    story.append(Paragraph("8. Complete Mock Dataset: Product Mappings & HUID Test Suite", h1_style))
+    story.append(Paragraph(
+        "Below are the seeded products used for standard mapping and the deterministic HUID test codes:",
+        body_style
+    ))
+
+    story.append(Paragraph("8.1 Products & Intelligent Standard Mappings (8 Seeded Products)", h2_style))
+    story.append(Paragraph(
+        "Used by <code>POST /api/v1/certification/map-product</code>. Typing any trigger keyword below maps to the standard:",
+        body_style
+    ))
+
+    prod_rows = [
+        [
+            Paragraph("Product Name", table_header),
+            Paragraph("Category", table_header),
+            Paragraph("Mapped Standard", table_header),
+            Paragraph("Applicable QCO & Scheme", table_header),
+            Paragraph("Trigger Query Keywords", table_header),
+        ],
+        [
+            Paragraph("Stainless Steel Vacuum Flask", table_cell),
+            Paragraph("Domestic Utensils", table_cell),
+            Paragraph("<code>IS 17803:2022</code>", table_cell_code),
+            Paragraph("Cookware QCO, 2023<br/>Scheme-I (ISI Mark - Mandatory)", table_cell),
+            Paragraph("flask, vacuum bottle, insulated container", table_cell),
+        ],
+        [
+            Paragraph("Two-Wheeler Protective Helmet", table_cell),
+            Paragraph("Personal Safety", table_cell),
+            Paragraph("<code>IS 4151:2015</code>", table_cell_code),
+            Paragraph("Two Wheeler Helmet QCO, 2020<br/>Scheme-I (ISI Mark - Mandatory)", table_cell),
+            Paragraph("helmet, motorcycle crash helmet, rider gear", table_cell),
+        ],
+        [
+            Paragraph("3-Pin Electrical Plug & Socket", table_cell),
+            Paragraph("Electrical Accessories", table_cell),
+            Paragraph("<code>IS 1293:2019</code>", table_cell_code),
+            Paragraph("Plugs QCO, 2021<br/>Scheme-I (ISI Mark - Mandatory)", table_cell),
+            Paragraph("plug, socket, power outlet, 6A, 16A", table_cell),
+        ],
+        [
+            Paragraph("Packaged Drinking Water Bottle", table_cell),
+            Paragraph("Food & Beverages", table_cell),
+            Paragraph("<code>IS 14543:2004</code>", table_cell_code),
+            Paragraph("Bottled Water QCO, 2021<br/>Scheme-I (ISI Mark - Mandatory)", table_cell),
+            Paragraph("packaged water, bottled mineral water", table_cell),
+        ],
+        [
+            Paragraph("Lithium-Ion Rechargeable Battery", table_cell),
+            Paragraph("Electronics & IT", table_cell),
+            Paragraph("<code>IS 16046 (Part 2):2018</code>", table_cell_code),
+            Paragraph("CRS Notification<br/>Scheme-II (CRS - Mandatory)", table_cell),
+            Paragraph("lithium battery, power bank, laptop cell", table_cell),
+        ],
+        [
+            Paragraph("Gold Bangle 22 Karat", table_cell),
+            Paragraph("Precious Jewellery", table_cell),
+            Paragraph("<code>IS 1417:2016</code>", table_cell_code),
+            Paragraph("Hallmarking Order<br/>Hallmarking Scheme (Mandatory)", table_cell),
+            Paragraph("gold bangle, 22k jewellery, gold necklace", table_cell),
+        ],
+        [
+            Paragraph("Plastic Toy Car", table_cell),
+            Paragraph("Children Products", table_cell),
+            Paragraph("<code>IS 9873 (Part 1):2019</code>", table_cell_code),
+            Paragraph("Toys Safety QCO, 2020<br/>Scheme-I (ISI Mark - Mandatory)", table_cell),
+            Paragraph("toy car, plastic toys, children games", table_cell),
+        ],
+        [
+            Paragraph("Fe 500D TMT Steel Bar", table_cell),
+            Paragraph("Construction Materials", table_cell),
+            Paragraph("<code>IS 1786:2008</code>", table_cell_code),
+            Paragraph("Steel Products QCO, 2024<br/>Scheme-I (ISI Mark - Mandatory)", table_cell),
+            Paragraph("tmt bar, reinforcement steel, saria, fe500d", table_cell),
+        ],
+    ]
+    t_prod = Table(prod_rows, colWidths=[100, 80, 85, 120, 119])
+    t_prod.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), accent_blue),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor("#cbd5e1")),
+        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, card_bg]),
+        ('TOPPADDING', (0,0), (-1,-1), 2.5),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 2.5),
+    ]))
+    story.append(t_prod)
+    story.append(Spacer(1, 10))
+
+    story.append(Paragraph("8.2 Complete HUID Verification Test Catalog", h2_style))
+    story.append(Paragraph(
+        "Used by <code>POST /api/v1/verification/huid</code>. Frontend can test all positive and negative visual states:",
+        body_style
+    ))
+
+    huid_complete_rows = [
+        [
+            Paragraph("Input Code", table_header),
+            Paragraph("Status", table_header),
+            Paragraph("Jeweller & Centre", table_header),
+            Paragraph("Article & Fineness", table_header),
+            Paragraph("Frontend UI Test Purpose", table_header),
+        ],
+        [
+            Paragraph("<code>ABC123</code>", table_cell_code),
+            Paragraph("<font color='#16a34a'><b>VERIFIED</b></font>", table_cell),
+            Paragraph("Zaveri Jewellers Ltd (Mumbai)<br/>Assayed: Zaveri Hallmarking Services", table_cell),
+            Paragraph("Gold Bangle (34.80g)<br/>Fineness: 916 (22K)", table_cell),
+            Paragraph("Standard baseline verified test case.", table_cell),
+        ],
+        [
+            Paragraph("<code>GLD916</code>", table_cell_code),
+            Paragraph("<font color='#16a34a'><b>VERIFIED</b></font>", table_cell),
+            Paragraph("Kalyan Heritage Gems (New Delhi)<br/>Assayed: Central Assaying Centre", table_cell),
+            Paragraph("Handcrafted Bangles Pair (42.50g)<br/>Fineness: 916 (22K Gold)", table_cell),
+            Paragraph("High-value bridal jewellery card.", table_cell),
+        ],
+        [
+            Paragraph("<code>DIA750</code>", table_cell_code),
+            Paragraph("<font color='#16a34a'><b>VERIFIED</b></font>", table_cell),
+            Paragraph("Tanishq Retail Vault (Bengaluru)<br/>Assayed: Deccan Testing Centre", table_cell),
+            Paragraph("Solitaire Diamond Ring (5.45g)<br/>Fineness: 750 (18K Gold)", table_cell),
+            Paragraph("18K gold purity display card.", table_cell),
+        ],
+        [
+            Paragraph("<code>SIL925</code>", table_cell_code),
+            Paragraph("<font color='#16a34a'><b>VERIFIED</b></font>", table_cell),
+            Paragraph("Johri Bazaar Jewels (Jaipur)<br/>Assayed: Rajasthan Heritage Assay", table_cell),
+            Paragraph("Puja Thali Set (450.00g)<br/>Fineness: 925 (Sterling Silver)", table_cell),
+            Paragraph("Silver hallmarking test card.", table_cell),
+        ],
+        [
+            Paragraph("<code>K98L2M</code>", table_cell_code),
+            Paragraph("<font color='#16a34a'><b>VERIFIED</b></font>", table_cell),
+            Paragraph("Malabar Ornaments Pvt Ltd (Kerala)<br/>Assayed: Malabar Complex", table_cell),
+            Paragraph("Kerala Kasu Mala (28.20g)<br/>Fineness: 916 (22K Gold)", table_cell),
+            Paragraph("Traditional ornament test case.", table_cell),
+        ],
+        [
+            Paragraph("<code>EXP999</code>", table_cell_code),
+            Paragraph("<font color='#d97706'><b>EXPIRED</b></font>", table_cell),
+            Paragraph("Royal Heritage Jewels (Surat)<br/>Registration status lapsed", table_cell),
+            Paragraph("Unspecified gold article<br/>Status: EXPIRED", table_cell),
+            Paragraph("Yellow warning badge & banner.", table_cell),
+        ],
+        [
+            Paragraph("<code>NOTF00</code>", table_cell_code),
+            Paragraph("<font color='#dc2626'><b>NOT_FOUND</b></font>", table_cell),
+            Paragraph("No registration on record<br/>Source: BIS Manakonline", table_cell),
+            Paragraph("N/A", table_cell),
+            Paragraph("Red alert badge ('Counterfeit risk').", table_cell),
+        ],
+        [
+            Paragraph("<code>ERR500</code>", table_cell_code),
+            Paragraph("<font color='#dc2626'><b>ERROR</b></font>", table_cell),
+            Paragraph("Simulated upstream registry error", table_cell),
+            Paragraph("N/A", table_cell),
+            Paragraph("Retry / connection error toast in UI.", table_cell),
+        ],
+        [
+            Paragraph("<i>Any other 6 chars</i><br/>(e.g. <code>M89K2P</code>)", table_cell),
+            Paragraph("<font color='#16a34a'><b>VERIFIED</b></font>", table_cell),
+            Paragraph("Partitioned deterministically into registered jewellers & AHCs", table_cell),
+            Paragraph("Gold Chain / Ring / Jhumkas<br/>Realistic weights & dates", table_cell),
+            Paragraph("Evaluators can type ANY 6-digit code during live judge demo.", table_cell),
+        ],
+    ]
+    t_huid_comp = Table(huid_complete_rows, colWidths=[65, 65, 140, 115, 119])
+    t_huid_comp.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), accent_blue),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor("#cbd5e1")),
+        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, card_bg]),
+        ('TOPPADDING', (0,0), (-1,-1), 2.5),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 2.5),
+    ]))
+    story.append(t_huid_comp)
 
     # Build PDF using NumberedCanvas
     doc.build(story, canvasmaker=NumberedCanvas)
