@@ -3,6 +3,7 @@ from __future__ import annotations
 from app.models.base import Base, ProvenanceMixin, TimestampMixin
 from app.models.certification import CertificationScheme
 from app.models.chat import Conversation, Message
+from app.models.grievance import Grievance, GrievanceStatus, IncidentType
 from app.models.hallmarking import AHCCentre, CentreStatus, Jeweller, JewellerStatus
 from app.models.laboratory import LabStatus, Laboratory, LaboratoryScope
 from app.models.product import Product, ProductStandardMapping
@@ -29,6 +30,9 @@ __all__ = [
     "CentreStatus",
     "CertificationScheme",
     "Conversation",
+    "Grievance",
+    "GrievanceStatus",
+    "IncidentType",
     "Jeweller",
     "JewellerStatus",
     "LabStatus",

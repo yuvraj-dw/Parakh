@@ -207,5 +207,72 @@ async def test_map_product_endpoint_includes_rejected_alternatives():
         assert len(data["rejected_alternatives"]) > 0
 
 
+def test_whistleblower_pii_sanitization():
+    from app.api.v1.grievance import sanitize_whistleblower_text
+
+    raw_text = (
+        "Hello, my name is Ramesh and I am Suresh. "
+        "You can reach me at ramesh.kumar@example.com or whistleblower123@gov.in. "
+        "My phone number is +91 9876543210 and alternate is 8765432109."
+    )
+    sanitized = sanitize_whistleblower_text(raw_text)
+
+    # Verify email redaction
+    assert "ramesh.kumar@example.com" not in sanitized
+    assert "whistleblower123@gov.in" not in sanitized
+    assert "[REDACTED_EMAIL]" in sanitized
+
+    # Verify phone redaction
+    assert "9876543210" not in sanitized
+    assert "8765432109" not in sanitized
+    assert "[REDACTED_PHONE]" in sanitized
+
+    # Verify self-identifying phrases redaction
+    assert "Ramesh" not in sanitized
+    assert "Suresh" not in sanitized
+    assert "[REDACTED_NAME]" in sanitized
+
+
+@pytest.mark.asyncio
+async def test_whistleblower_endpoint_lifecycle():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        payload = {
+            "incident_type": "COUNTERFEIT_ISI",
+            "suspect_entity": "Acme Steel Mills Ltd",
+            "location": "Plot 42, Industrial Area, Ghaziabad, UP",
+            "description": "My name is Amit and I saw fake ISI marks. Contact me at amit@fakeco.com or +919876543210.",
+            "image_url": "https://example.com/evidence1.jpg",
+        }
+        resp = await ac.post("/api/v1/grievances/whistleblower", json=payload)
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "tracking_code" in data
+        assert data["tracking_code"].startswith("BIS-WH-")
+        assert data["status"] == "LOGGED"
+        assert data["incident_type"] == "COUNTERFEIT_ISI"
+        assert "DPDP Act, 2023" in data["message"]
+
+        tracking_code = data["tracking_code"]
+
+        # Call GET endpoint
+        get_resp = await ac.get(f"/api/v1/grievances/whistleblower/{tracking_code}")
+        assert get_resp.status_code == 200
+        get_data = get_resp.json()
+        assert get_data["tracking_code"] == tracking_code
+        assert get_data["status"] == "LOGGED"
+        assert get_data["suspect_entity"] == "Acme Steel Mills Ltd"
+        assert "[REDACTED_NAME]" in get_data["evidence_text"]
+        assert "[REDACTED_EMAIL]" in get_data["evidence_text"]
+        assert "[REDACTED_PHONE]" in get_data["evidence_text"]
+        assert "Amit" not in get_data["evidence_text"]
+        assert "amit@fakeco.com" not in get_data["evidence_text"]
+        assert "9876543210" not in get_data["evidence_text"]
+
+        # Non-existent tracking code
+        bad_resp = await ac.get("/api/v1/grievances/whistleblower/BIS-WH-9999-NOTFOUND")
+        assert bad_resp.status_code == 404
+
+
+
 
 
