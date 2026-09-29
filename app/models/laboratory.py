@@ -4,7 +4,7 @@ import enum
 import uuid
 from datetime import date
 from typing import List, Optional
-from sqlalchemy import Date, Enum, ForeignKey, JSON, String, Text
+from sqlalchemy import Date, Enum, Float, ForeignKey, JSON, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, ProvenanceMixin, TimestampMixin
@@ -37,6 +37,8 @@ class Laboratory(Base, ProvenanceMixin, TimestampMixin):
     )
     valid_from: Mapped[date | None] = mapped_column(Date, nullable=True)
     valid_until: Mapped[date | None] = mapped_column(Date, nullable=True)
+    latitude: Mapped[float | None] = mapped_column(Float, nullable=True)
+    longitude: Mapped[float | None] = mapped_column(Float, nullable=True)
 
     scopes: Mapped[List[LaboratoryScope]] = relationship(
         "LaboratoryScope", back_populates="laboratory", cascade="all, delete-orphan"

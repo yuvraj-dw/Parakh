@@ -30,5 +30,9 @@ class LaboratoryOut(BaseModel):
     status: str
     valid_from: Optional[date] = None
     valid_until: Optional[date] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    distance_km: Optional[float] = None
+    maps_url: Optional[str] = None
 
     model_config = {"from_attributes": True}

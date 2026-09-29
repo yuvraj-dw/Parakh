@@ -222,6 +222,8 @@ LABORATORIES_DATA = [
         "district": "Central Delhi",
         "state": "Delhi",
         "status": LabStatus.RECOGNIZED,
+        "latitude": 28.6289,
+        "longitude": 77.2065,
         "is_numbers": ["IS 17803:2022", "IS 1293:2019", "IS 14543:2004"],
     },
     {
@@ -231,6 +233,8 @@ LABORATORIES_DATA = [
         "district": "Mumbai Suburban",
         "state": "Maharashtra",
         "status": LabStatus.RECOGNIZED,
+        "latitude": 19.0760,
+        "longitude": 72.8777,
         "is_numbers": ["IS 1417:2016", "IS 2112:2014", "IS 1786:2008"],
     },
     {
@@ -240,6 +244,8 @@ LABORATORIES_DATA = [
         "district": "Bengaluru Urban",
         "state": "Karnataka",
         "status": LabStatus.RECOGNIZED,
+        "latitude": 12.9716,
+        "longitude": 77.5946,
         "is_numbers": ["IS 13252 (Part 1):2010", "IS 16046 (Part 2):2018"],
     },
     {
@@ -249,6 +255,8 @@ LABORATORIES_DATA = [
         "district": "Chennai",
         "state": "Tamil Nadu",
         "status": LabStatus.RECOGNIZED,
+        "latitude": 13.0827,
+        "longitude": 80.2707,
         "is_numbers": ["IS 4151:2015", "IS 1293:2019"],
     },
     {
@@ -258,6 +266,8 @@ LABORATORIES_DATA = [
         "district": "Kolkata",
         "state": "West Bengal",
         "status": LabStatus.RECOGNIZED,
+        "latitude": 22.5726,
+        "longitude": 88.3639,
         "is_numbers": ["IS 1786:2008", "IS 17803:2022"],
     },
     {
@@ -267,6 +277,8 @@ LABORATORIES_DATA = [
         "district": "Ahmedabad",
         "state": "Gujarat",
         "status": LabStatus.RECOGNIZED,
+        "latitude": 23.0225,
+        "longitude": 72.5714,
         "is_numbers": ["IS 9873 (Part 1):2019", "IS 14543:2004"],
     },
     {
@@ -276,6 +288,8 @@ LABORATORIES_DATA = [
         "district": "Jaipur",
         "state": "Rajasthan",
         "status": LabStatus.RECOGNIZED,
+        "latitude": 26.9124,
+        "longitude": 75.7873,
         "is_numbers": ["IS 1417:2016", "IS 2112:2014"],
     },
     {
@@ -285,6 +299,8 @@ LABORATORIES_DATA = [
         "district": "Hyderabad",
         "state": "Telangana",
         "status": LabStatus.RECOGNIZED,
+        "latitude": 17.3850,
+        "longitude": 78.4867,
         "is_numbers": ["IS 302 (Part 1):2008", "IS 1293:2019"],
     },
 ]
@@ -611,6 +627,8 @@ async def seed(session_factory: Optional[async_sessionmaker[AsyncSession]] = Non
                     district=l_data["district"],
                     state=l_data["state"],
                     status=l_data["status"],
+                    latitude=l_data.get("latitude"),
+                    longitude=l_data.get("longitude"),
                 )
                 session.add(lab)
                 await session.flush()
@@ -624,6 +642,9 @@ async def seed(session_factory: Optional[async_sessionmaker[AsyncSession]] = Non
                         parameter="Material, Physical and Safety Parameters",
                     )
                     session.add(scope)
+            else:
+                existing.latitude = l_data.get("latitude")
+                existing.longitude = l_data.get("longitude")
 
         logger.info("Seeding AHC Centres...")
         for a_data in AHC_CENTRES_DATA:
