@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 from app.config import get_settings
 from app.core.exceptions import AppException
 from app.api.v1.router import api_v1_router
-from app.api.v1.grievance import router as grievance_router
+from app.api.v1.grievance import router as grievance_router, whistleblower_router
 
 settings = get_settings()
 
@@ -56,7 +56,8 @@ async def app_exception_handler(request: Request, exc: AppException):
 
 
 app.include_router(api_v1_router, prefix=settings.API_V1_STR)
-app.include_router(grievance_router, prefix="/api/v1")
+app.include_router(grievance_router, prefix=f"{settings.API_V1_STR}/grievances")
+app.include_router(whistleblower_router, prefix=f"{settings.API_V1_STR}/whistleblower")
 
 
 @app.get("/health")

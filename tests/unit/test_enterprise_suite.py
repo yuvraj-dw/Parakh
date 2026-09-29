@@ -211,7 +211,7 @@ def test_whistleblower_pii_sanitization():
     from app.api.v1.grievance import sanitize_whistleblower_text
 
     raw_text = (
-        "Hello, my name is Ramesh and I am Suresh. "
+        "Hello, my name is Ramesh Kumar and I'm Suresh Sharma. "
         "You can reach me at ramesh.kumar@example.com or whistleblower123@gov.in. "
         "My phone number is +91 9876543210 and alternate is 8765432109."
     )
@@ -227,9 +227,13 @@ def test_whistleblower_pii_sanitization():
     assert "8765432109" not in sanitized
     assert "[REDACTED_PHONE]" in sanitized
 
-    # Verify self-identifying phrases redaction
+    # Verify self-identifying phrases redaction (including multi-word names and contractions)
     assert "Ramesh" not in sanitized
+    assert "Kumar" not in sanitized
     assert "Suresh" not in sanitized
+    assert "Sharma" not in sanitized
+    assert "my name is [REDACTED_NAME]" in sanitized
+    assert "I'm [REDACTED_NAME]" in sanitized
     assert "[REDACTED_NAME]" in sanitized
 
 
@@ -240,7 +244,7 @@ async def test_whistleblower_endpoint_lifecycle():
             "incident_type": "COUNTERFEIT_ISI",
             "suspect_entity": "Acme Steel Mills Ltd",
             "location": "Plot 42, Industrial Area, Ghaziabad, UP",
-            "description": "My name is Amit and I saw fake ISI marks. Contact me at amit@fakeco.com or +919876543210.",
+            "description": "My name is Amit Patel and I saw fake ISI marks. Contact me at amit@fakeco.com or +919876543210.",
             "image_url": "https://example.com/evidence1.jpg",
         }
         resp = await ac.post("/api/v1/grievances/whistleblower", json=payload)
@@ -254,7 +258,7 @@ async def test_whistleblower_endpoint_lifecycle():
 
         tracking_code = data["tracking_code"]
 
-        # Call GET endpoint
+        # Call GET endpoint via /api/v1/grievances/whistleblower/{tracking_code}
         get_resp = await ac.get(f"/api/v1/grievances/whistleblower/{tracking_code}")
         assert get_resp.status_code == 200
         get_data = get_resp.json()
@@ -265,12 +269,66 @@ async def test_whistleblower_endpoint_lifecycle():
         assert "[REDACTED_EMAIL]" in get_data["evidence_text"]
         assert "[REDACTED_PHONE]" in get_data["evidence_text"]
         assert "Amit" not in get_data["evidence_text"]
+        assert "Patel" not in get_data["evidence_text"]
         assert "amit@fakeco.com" not in get_data["evidence_text"]
         assert "9876543210" not in get_data["evidence_text"]
+        assert "created_at" in get_data
+
+        # Call GET endpoint via alias /api/v1/whistleblower/{tracking_code}
+        alias_get = await ac.get(f"/api/v1/whistleblower/{tracking_code}")
+        assert alias_get.status_code == 200
+        assert alias_get.json()["tracking_code"] == tracking_code
+
+        # Call GET endpoint via /api/v1/grievances/{tracking_code}
+        grievance_get = await ac.get(f"/api/v1/grievances/{tracking_code}")
+        assert grievance_get.status_code == 200
+        assert grievance_get.json()["tracking_code"] == tracking_code
+
+        # Test POST via alias /api/v1/whistleblower
+        alias_post = await ac.post("/api/v1/whistleblower", json=payload)
+        assert alias_post.status_code == 200
+        assert alias_post.json()["tracking_code"].startswith("BIS-WH-")
+
+        # Test POST via /api/v1/grievances
+        grievance_post = await ac.post("/api/v1/grievances", json=payload)
+        assert grievance_post.status_code == 200
+        assert grievance_post.json()["tracking_code"].startswith("BIS-WH-")
 
         # Non-existent tracking code
         bad_resp = await ac.get("/api/v1/grievances/whistleblower/BIS-WH-9999-NOTFOUND")
         assert bad_resp.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_whistleblower_field_validation():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        base_payload = {
+            "incident_type": "COUNTERFEIT_ISI",
+            "suspect_entity": "Acme",
+            "location": "Ghaziabad",
+            "description": "Suspicious activity description",
+            "image_url": "https://example.com/evidence.jpg",
+        }
+
+        # suspect_entity exceeds 255 chars
+        p1 = dict(base_payload, suspect_entity="A" * 256)
+        r1 = await ac.post("/api/v1/grievances/whistleblower", json=p1)
+        assert r1.status_code == 422
+
+        # location exceeds 255 chars
+        p2 = dict(base_payload, location="L" * 256)
+        r2 = await ac.post("/api/v1/grievances/whistleblower", json=p2)
+        assert r2.status_code == 422
+
+        # description exceeds 5000 chars
+        p3 = dict(base_payload, description="D" * 5001)
+        r3 = await ac.post("/api/v1/grievances/whistleblower", json=p3)
+        assert r3.status_code == 422
+
+        # image_url exceeds 500 chars
+        p4 = dict(base_payload, image_url="https://example.com/" + "i" * 500)
+        r4 = await ac.post("/api/v1/grievances/whistleblower", json=p4)
+        assert r4.status_code == 422
 
 
 
