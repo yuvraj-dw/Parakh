@@ -10,7 +10,7 @@ from app.integrations.rag.base import BaseRAGProvider
 from app.models.chat import Conversation, Message
 from app.models.standard import Standard
 
-BASE_SYSTEM_PROMPT = "You are an official BIS Assistant. Answer accurately using provided context."
+BASE_SYSTEM_PROMPT = "You are Parakh, the official AI-powered BIS compliance and standards intelligence assistant. Answer accurately using provided context."
 
 
 def get_persona_system_prompt(persona: str = "CONSUMER") -> str:

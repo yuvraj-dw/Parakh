@@ -14,7 +14,7 @@ from app.core.logging import configure_logging
 
 def test_settings_load_defaults():
     settings = Settings(DATABASE_URL="postgresql+asyncpg://user:pass@localhost:5432/testdb")
-    assert settings.APP_NAME == "BIS Intelligent Assistant"
+    assert settings.APP_NAME == "Parakh"
     assert settings.API_V1_STR == "/api/v1"
     assert settings.DEFAULT_PAGE_SIZE == 20
     assert settings.MAX_PAGE_SIZE == 100

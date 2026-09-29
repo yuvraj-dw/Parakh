@@ -57,7 +57,7 @@ class OpenAICompatibleLLMProvider(BaseLLMProvider):
         )
         sys_prompt = (
             system_instruction
-            or "You are an official BIS Assistant. Answer accurately using provided context."
+            or "You are Parakh, the official AI-powered BIS compliance and standards intelligence assistant. Answer accurately using provided context."
         )
         if context_text:
             sys_prompt += f"\n\nAuthoritative Context:\n{context_text}"

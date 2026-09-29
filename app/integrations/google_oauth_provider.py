@@ -136,7 +136,7 @@ class GoogleOAuthLLMProvider(BaseLLMProvider):
                 for c in context_chunks
             ]
         )
-        sys_prompt = system_instruction or "You are an official BIS Assistant. Answer accurately using provided context."
+        sys_prompt = system_instruction or "You are Parakh, the official AI-powered BIS compliance and standards intelligence assistant. Answer accurately using provided context."
         if context_text:
             sys_prompt += f"\n\nAuthoritative Regulatory Context:\n{context_text}"
 

@@ -1,5 +1,5 @@
 """Generate an exhaustive, publication-grade Backend Integration Guide & Complete Mock Data Reference PDF
-for Frontend and RAG engineers working on PARAKH (BIS Intelligent Assistant).
+for Frontend and RAG engineers working on PARAKH.
 """
 import os
 import sys
@@ -35,7 +35,7 @@ class NumberedCanvas(canvas.Canvas):
         
         # Header (pages > 1)
         if self._pageNumber > 1:
-            self.drawString(54, 755, "PARAKH (BIS Intelligent Assistant) - Backend Integration Guide & Mock Data Reference")
+            self.drawString(54, 755, "PARAKH - Backend Integration Guide & Mock Data Reference")
             self.drawRightString(558, 755, "Confidential - For Internal Dev Teams")
             self.setStrokeColor(colors.HexColor("#cbd5e1"))
             self.setLineWidth(0.5)
@@ -176,7 +176,7 @@ def create_backend_guide(output_pdf_path: str):
     # ==========================================
     # PAGE 1: TITLE, META, ARCHITECTURE, GOTCHAS
     # ==========================================
-    story.append(Paragraph("PARAKH: BIS INTELLIGENT ASSISTANT", title_style))
+    story.append(Paragraph("PARAKH: AI-POWERED COMPLIANCE PLATFORM", title_style))
     story.append(Paragraph("Complete Backend Architecture, Integration Guide & Mock Dataset Reference for Frontend & RAG Teams", subtitle_style))
     story.append(HRFlowable(width="100%", thickness=1.5, color=accent_blue, spaceBefore=0, spaceAfter=8))
 
