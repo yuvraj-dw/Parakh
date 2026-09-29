@@ -17,5 +17,14 @@ class QCOOut(BaseModel):
     effective_date: Optional[date] = None
     status: str
     source_url: Optional[str] = None
+    days_until_enforcement: int = 0
+    is_enforced: bool = False
+    msme_micro_deadline: Optional[str] = None
+    msme_small_deadline: Optional[str] = None
+    exemption_note: Optional[str] = None
 
     model_config = {"from_attributes": True}
+
+
+QCOItem = QCOOut
+

@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+from datetime import date
 import pytest
 from app.api.v1.laboratories import calculate_haversine_distance
+from app.api.v1.qco import compute_qco_enforcement_details
 from app.models.laboratory import Laboratory
 from app.schemas.laboratories import LaboratoryOut
 
@@ -92,4 +94,39 @@ def test_laboratory_out_schema_and_sorting():
     assert items[1].distance_km == 150.5
     assert items[2].distance_km is None
     assert items[3].distance_km is None
+
+
+def test_qco_enforcement_computation():
+    # Future date: effective 2027-01-01, today 2026-09-29
+    res_future = compute_qco_enforcement_details(
+        effective_date=date(2027, 1, 1),
+        today=date(2026, 9, 29),
+    )
+    assert res_future["is_enforced"] is False
+    assert res_future["days_until_enforcement"] > 0
+    assert res_future["msme_micro_deadline"] == "2027-07-01"
+    assert res_future["msme_small_deadline"] == "2027-04-01"
+    assert "exemption_note" in res_future
+
+    # Past date: effective 2024-03-01, today 2026-09-29
+    res_past = compute_qco_enforcement_details(
+        effective_date=date(2024, 3, 1),
+        today=date(2026, 9, 29),
+    )
+    assert res_past["is_enforced"] is True
+    assert res_past["days_until_enforcement"] < 0
+    assert res_past["msme_micro_deadline"] == "2024-09-01"
+    assert res_past["msme_small_deadline"] == "2024-06-01"
+
+    # None effective_date
+    res_none = compute_qco_enforcement_details(
+        effective_date=None,
+        today=date(2026, 9, 29),
+    )
+    assert res_none["is_enforced"] is False
+    assert res_none["days_until_enforcement"] == 0
+    assert res_none["msme_micro_deadline"] is None
+    assert res_none["msme_small_deadline"] is None
+    assert res_none["exemption_note"] == "No effective date specified in gazette."
+
 

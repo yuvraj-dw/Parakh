@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+from datetime import date
 from typing import Optional
+from dateutil.relativedelta import relativedelta
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,9 +10,33 @@ from app.core.exceptions import ResourceNotFoundException
 from app.dependencies import get_db
 from app.models.qco import QCO
 from app.schemas.common import PaginatedResponse, PaginationMeta
-from app.schemas.qco import QCOOut
+from app.schemas.qco import QCOItem, QCOOut
 
 router = APIRouter(prefix="/qco", tags=["Quality Control Orders"])
+
+
+def compute_qco_enforcement_details(effective_date: date | None, today: date | None = None) -> dict:
+    if not today:
+        today = date.today()
+    if not effective_date:
+        return {
+            "days_until_enforcement": 0,
+            "is_enforced": False,
+            "msme_micro_deadline": None,
+            "msme_small_deadline": None,
+            "exemption_note": "No effective date specified in gazette.",
+        }
+    days = (effective_date - today).days
+    micro_dl = (effective_date + relativedelta(months=6)).isoformat()
+    small_dl = (effective_date + relativedelta(months=3)).isoformat()
+    return {
+        "days_until_enforcement": days,
+        "is_enforced": today >= effective_date,
+        "msme_micro_deadline": micro_dl,
+        "msme_small_deadline": small_dl,
+        "exemption_note": "Micro enterprises receive a 6-month extension; Small enterprises receive 3 months under Ministry guidelines.",
+    }
+
 
 
 @router.get("", response_model=PaginatedResponse[QCOOut])
@@ -55,6 +81,7 @@ async def list_qcos(
                 effective_date=r.effective_date,
                 status=r.status.value if hasattr(r.status, "value") else str(r.status),
                 source_url=r.source_url,
+                **compute_qco_enforcement_details(r.effective_date),
             )
             for r in records
         ]
@@ -69,6 +96,7 @@ async def list_qcos(
                 ministry="Ministry of Commerce and Industry",
                 status="ACTIVE",
                 source_url="https://egazette.gov.in",
+                **compute_qco_enforcement_details(None),
             )
         ]
         total_items = len(items)
@@ -88,7 +116,7 @@ async def list_qcos(
 
 
 @router.get("/{id}", response_model=QCOOut)
-async def get_qco_by_id(
+async def get_qco(
     id: str,
     db: AsyncSession = Depends(get_db),
 ):
@@ -107,6 +135,7 @@ async def get_qco_by_id(
             effective_date=record.effective_date,
             status=record.status.value if hasattr(record.status, "value") else str(record.status),
             source_url=record.source_url,
+            **compute_qco_enforcement_details(record.effective_date),
         )
     if id == "qco-1":
         return QCOOut(
@@ -118,5 +147,9 @@ async def get_qco_by_id(
             ministry="Ministry of Commerce and Industry",
             status="ACTIVE",
             source_url="https://egazette.gov.in",
+            **compute_qco_enforcement_details(None),
         )
     raise ResourceNotFoundException("QCO", id)
+
+
+get_qco_by_id = get_qco
