@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from datetime import date
 from typing import Optional
-from dateutil.relativedelta import relativedelta
+try:
+    from dateutil.relativedelta import relativedelta
+except ImportError:
+    relativedelta = None
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -27,8 +30,14 @@ def compute_qco_enforcement_details(effective_date: date | None, today: date | N
             "exemption_note": "No effective date specified in gazette.",
         }
     days = (effective_date - today).days
-    micro_dl = (effective_date + relativedelta(months=6)).isoformat()
-    small_dl = (effective_date + relativedelta(months=3)).isoformat()
+    if relativedelta is not None:
+        micro_dl = (effective_date + relativedelta(months=6)).isoformat()
+        small_dl = (effective_date + relativedelta(months=3)).isoformat()
+    else:
+        # Fallback approximation: 30 days per month
+        from datetime import timedelta
+        micro_dl = (effective_date + timedelta(days=182)).isoformat()
+        small_dl = (effective_date + timedelta(days=91)).isoformat()
     return {
         "days_until_enforcement": days,
         "is_enforced": today >= effective_date,
