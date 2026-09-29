@@ -2,10 +2,14 @@ from __future__ import annotations
 
 from datetime import date
 import pytest
+from httpx import ASGITransport, AsyncClient
 from app.api.v1.laboratories import calculate_haversine_distance
 from app.api.v1.qco import compute_qco_enforcement_details
+from app.api.v1.chat import ChatRequest
+from app.main import app
 from app.models.laboratory import Laboratory
 from app.schemas.laboratories import LaboratoryOut
+from app.services.chat_service import get_persona_system_prompt
 
 
 def test_haversine_distance_calculation():
@@ -128,5 +132,48 @@ def test_qco_enforcement_computation():
     assert res_none["msme_micro_deadline"] is None
     assert res_none["msme_small_deadline"] is None
     assert res_none["exemption_note"] == "No effective date specified in gazette."
+
+
+def test_persona_system_prompt_selection():
+    consumer_prompt = get_persona_system_prompt("CONSUMER")
+    assert "consumer rights" in consumer_prompt.lower() or "product safety" in consumer_prompt.lower()
+
+    industry_prompt = get_persona_system_prompt("INDUSTRY")
+    assert "msme" in industry_prompt.lower() or "clause" in industry_prompt.lower()
+
+    # Test default/unknown defaults to consumer prompt
+    default_prompt = get_persona_system_prompt()
+    assert default_prompt == consumer_prompt
+
+    unknown_prompt = get_persona_system_prompt("UNKNOWN")
+    assert unknown_prompt == consumer_prompt
+
+    none_prompt = get_persona_system_prompt(None)
+    assert none_prompt == consumer_prompt
+
+
+@pytest.mark.asyncio
+async def test_chat_endpoint_with_persona():
+    # Verify ChatRequest accepts persona="INDUSTRY" and persona="CONSUMER"
+    req_industry = ChatRequest(message="Standards for steel", persona="INDUSTRY")
+    assert req_industry.persona == "INDUSTRY"
+
+    req_consumer = ChatRequest(message="Is this gold certified?", persona="CONSUMER")
+    assert req_consumer.persona == "CONSUMER"
+
+    req_default = ChatRequest(message="General query")
+    assert req_default.persona == "CONSUMER"
+
+    # Verify endpoint invocation with persona
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        resp = await ac.post(
+            "/api/v1/chat",
+            json={"message": "What standard applies to steel?", "persona": "INDUSTRY"},
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "answer" in data
+        assert "conversation_id" in data
+
 
 

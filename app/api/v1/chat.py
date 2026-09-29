@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import AppException
@@ -17,6 +17,16 @@ class ChatRequest(BaseModel):
     message: Optional[str] = None
     query: Optional[str] = None
     conversation_id: Optional[str] = None
+    persona: Optional[Literal["CONSUMER", "INDUSTRY"]] = "CONSUMER"
+
+    @field_validator("persona", mode="before")
+    @classmethod
+    def normalize_persona(cls, v: Any) -> Any:
+        if isinstance(v, str):
+            clean = v.strip().upper()
+            if clean in ("CONSUMER", "INDUSTRY"):
+                return clean
+        return v
 
 
 class ChatResponse(BaseModel):
@@ -26,7 +36,7 @@ class ChatResponse(BaseModel):
 
 
 @router.post("", response_model=ChatResponse)
-async def send_chat_message(
+async def chat_endpoint(
     payload: ChatRequest,
     db: AsyncSession = Depends(get_db),
     chat_service: ChatService = Depends(get_chat_service),
@@ -36,11 +46,12 @@ async def send_chat_message(
     if not user_msg or not user_msg.strip():
         raise AppException("INVALID_INPUT", "Field 'message' is required", 400)
 
-    result = await chat_service.handle_message(
+    result = await chat_service.process_message(
         db=db,
         conversation_id=payload.conversation_id,
         user_message=user_msg.strip(),
         user_id=current_user.id if current_user else None,
+        persona=payload.persona or "CONSUMER",
     )
 
     return ChatResponse(
@@ -48,6 +59,9 @@ async def send_chat_message(
         answer=result["answer"],
         citations=result["citations"],
     )
+
+
+send_chat_message = chat_endpoint
 
 
 @router.get("/conversations")

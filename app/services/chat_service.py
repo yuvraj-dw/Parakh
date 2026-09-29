@@ -10,18 +10,38 @@ from app.integrations.rag.base import BaseRAGProvider
 from app.models.chat import Conversation, Message
 from app.models.standard import Standard
 
+BASE_SYSTEM_PROMPT = "You are an official BIS Assistant. Answer accurately using provided context."
+
+
+def get_persona_system_prompt(persona: str = "CONSUMER") -> str:
+    clean = (persona or "CONSUMER").strip().upper()
+    if clean == "INDUSTRY":
+        return (
+            "You are an expert technical regulatory advisor for Indian manufacturers and MSMEs. "
+            "Cite exact Indian Standard clause numbers, quality control order statutory notifications, "
+            "testing sample sizes, factory audit requirements, and MSME concessions (e.g. 20% discount on marking fees). "
+            "Maintain a precise, professional tone."
+        )
+    return (
+        "You are an approachable consumer guide for the Bureau of Indian Standards. "
+        "Explain concepts in clear, non-technical everyday language. Focus on product safety, "
+        "consumer rights under the Consumer Protection Act, hallmark verification steps, "
+        "and how to spot counterfeit marks. Avoid obscure clause jargon."
+    )
+
 
 class ChatService:
     def __init__(self, rag_provider: BaseRAGProvider, llm_provider: BaseLLMProvider):
         self.rag = rag_provider
         self.llm = llm_provider
 
-    async def handle_message(
+    async def process_message(
         self,
         db: AsyncSession,
         conversation_id: Optional[str],
         user_message: str,
         user_id: Optional[str] = None,
+        persona: str = "CONSUMER",
     ) -> Dict[str, Any]:
         # 1. Retrieve or create conversation
         conv: Optional[Conversation] = None
@@ -67,9 +87,12 @@ class ChatService:
         chunks = await self.rag.retrieve(query=user_message, top_k=4)
 
         # 5. Synthesize with LLM
+        persona_prompt = get_persona_system_prompt(persona)
+        system_instruction = f"{BASE_SYSTEM_PROMPT}\n\n{persona_prompt}".strip()
         llm_res: LLMResult = await self.llm.generate_response(
             messages=messages_payload,
             context_chunks=chunks,
+            system_instruction=system_instruction,
         )
 
         # 6. Validate citations against standards table in DB
@@ -100,6 +123,22 @@ class ChatService:
             "answer": llm_res.answer,
             "citations": citations_data,
         }
+
+    async def handle_message(
+        self,
+        db: AsyncSession,
+        conversation_id: Optional[str],
+        user_message: str,
+        user_id: Optional[str] = None,
+        persona: str = "CONSUMER",
+    ) -> Dict[str, Any]:
+        return await self.process_message(
+            db=db,
+            conversation_id=conversation_id,
+            user_message=user_message,
+            user_id=user_id,
+            persona=persona,
+        )
 
     async def get_conversation(
         self, db: AsyncSession, conversation_id: str
