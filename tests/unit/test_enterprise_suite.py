@@ -331,6 +331,100 @@ async def test_whistleblower_field_validation():
         assert r4.status_code == 422
 
 
+@pytest.mark.asyncio
+async def test_knowledge_gap_model_and_admin_report(db_session):
+    from app.models.knowledge_gap import KnowledgeGap
+    from app.models.user import User, UserRole
+    from app.core.security import get_password_hash, create_access_token
+
+    # 1. Test KnowledgeGap model instantiation
+    gap = KnowledgeGap(
+        query_text="unmatched organic bamboo toothbrush",
+        retrieval_score=0.0,
+        category="PRODUCT_MAPPING",
+        frequency=2,
+    )
+    assert gap.query_text == "unmatched organic bamboo toothbrush"
+    assert gap.retrieval_score == 0.0
+    assert gap.category == "PRODUCT_MAPPING"
+    assert gap.frequency == 2
+    assert gap.id is not None
+    assert gap.created_at is not None
+
+    # Insert gap into db
+    db_session.add(gap)
+    # Also create regular and admin user
+    reg_user = User(
+        email="suite_user@example.com",
+        hashed_password=get_password_hash("pass123"),
+        role=UserRole.USER,
+    )
+    admin_user = User(
+        email="suite_admin@bis.gov.in",
+        hashed_password=get_password_hash("admin123"),
+        role=UserRole.ADMIN,
+    )
+    db_session.add_all([reg_user, admin_user])
+    await db_session.commit()
+
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        # 2. Test unauthenticated request -> 401
+        unauth_resp = await ac.get("/api/v1/admin/gap-report")
+        assert unauth_resp.status_code == 401
+
+        # Test non-admin request -> 403
+        reg_token = create_access_token({"sub": reg_user.id})
+        non_admin_resp = await ac.get(
+            "/api/v1/admin/gap-report",
+            headers={"Authorization": f"Bearer {reg_token}"},
+        )
+        assert non_admin_resp.status_code == 403
+
+        # 3. Test admin request -> returns gap report list
+        admin_token = create_access_token({"sub": admin_user.id})
+        admin_resp = await ac.get(
+            "/api/v1/admin/gap-report",
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert admin_resp.status_code == 200
+        data = admin_resp.json()
+        assert "total_gaps_logged" in data
+        assert data["total_gaps_logged"] >= 1
+        assert "items" in data
+        assert isinstance(data["items"], list)
+        assert any(item["query_text"] == "unmatched organic bamboo toothbrush" for item in data["items"])
+        matched_item = next(item for item in data["items"] if item["query_text"] == "unmatched organic bamboo toothbrush")
+        assert matched_item["frequency"] == 2
+        assert matched_item["category"] == "PRODUCT_MAPPING"
+        assert matched_item["retrieval_score"] == 0.0
+        assert "created_at" in matched_item
+
+        # 4. Test product mapping logs knowledge gap on unmatched fallback
+        map_resp = await ac.post(
+            "/api/v1/certification/map-product",
+            json={"description": "completely unmatched alien gadget 9999"},
+        )
+        assert map_resp.status_code == 200
+
+        # Increment existing gap
+        map_resp2 = await ac.post(
+            "/api/v1/certification/map-product",
+            json={"description": "completely unmatched alien gadget 9999"},
+        )
+        assert map_resp2.status_code == 200
+
+        # Admin report should now show the new gap with frequency 2
+        admin_resp2 = await ac.get(
+            "/api/v1/admin/gap-report",
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        data2 = admin_resp2.json()
+        assert any(item["query_text"] == "completely unmatched alien gadget 9999" for item in data2["items"])
+        alien_item = next(item for item in data2["items"] if item["query_text"] == "completely unmatched alien gadget 9999")
+        assert alien_item["frequency"] == 2
+
+
+
 
 
 

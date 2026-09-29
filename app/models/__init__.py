@@ -5,6 +5,7 @@ from app.models.certification import CertificationScheme
 from app.models.chat import Conversation, Message
 from app.models.grievance import Grievance, GrievanceStatus, IncidentType
 from app.models.hallmarking import AHCCentre, CentreStatus, Jeweller, JewellerStatus
+from app.models.knowledge_gap import KnowledgeGap
 from app.models.laboratory import LabStatus, Laboratory, LaboratoryScope
 from app.models.product import Product, ProductStandardMapping
 from app.models.qco import QCO, QCOStatus
@@ -35,6 +36,7 @@ __all__ = [
     "IncidentType",
     "Jeweller",
     "JewellerStatus",
+    "KnowledgeGap",
     "LabStatus",
     "Laboratory",
     "LaboratoryScope",

@@ -6,7 +6,13 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.dependencies import get_current_admin, get_db, get_sync_service
+from app.dependencies import (
+    get_current_admin,
+    get_db,
+    get_sync_service,
+    require_admin,
+)
+from app.models.knowledge_gap import KnowledgeGap
 from app.models.sync import SyncError, SyncRun
 from app.models.user import User
 from app.schemas.common import PaginatedResponse, PaginationMeta
@@ -184,3 +190,33 @@ async def get_source_health(
         ],
         "checked_at": now_iso,
     }
+
+
+@router.get("/gap-report")
+async def get_gap_report(
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    count_stmt = select(func.count()).select_from(KnowledgeGap)
+    count = (await db.execute(count_stmt)).scalar() or 0
+
+    stmt = select(KnowledgeGap).order_by(KnowledgeGap.frequency.desc())
+    records = (await db.execute(stmt)).scalars().all()
+
+    items = [
+        {
+            "id": gap.id,
+            "query_text": gap.query_text,
+            "retrieval_score": gap.retrieval_score,
+            "category": gap.category,
+            "frequency": gap.frequency,
+            "created_at": gap.created_at,
+        }
+        for gap in records
+    ]
+
+    return {
+        "total_gaps_logged": count,
+        "items": items,
+    }
+

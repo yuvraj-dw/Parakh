@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies import get_db
 from app.models.certification import CertificationScheme
+from app.models.knowledge_gap import KnowledgeGap
 from app.models.product import Product, ProductStandardMapping
 from app.models.qco import QCO
 from app.models.standard import Standard
@@ -181,6 +182,19 @@ async def map_product(
                 "reasoning": f"Description matches specifications for {matched_prod.name} under {std.is_number if std else ''}.",
                 "rejected_alternatives": generate_rejected_alternatives(candidate_standard),
             }
+
+    gap_stmt = select(KnowledgeGap).where(KnowledgeGap.query_text == payload.description)
+    existing_gap = (await db.execute(gap_stmt)).scalar_one_or_none()
+    if existing_gap:
+        existing_gap.frequency += 1
+    else:
+        new_gap = KnowledgeGap(
+            query_text=payload.description,
+            retrieval_score=0.0,
+            category="PRODUCT_MAPPING",
+        )
+        db.add(new_gap)
+    await db.commit()
 
     candidate_standard = "IS 17803:2022"
     return {

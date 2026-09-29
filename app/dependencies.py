@@ -132,6 +132,9 @@ async def get_current_admin(
     return current_user
 
 
+require_admin = get_current_admin
+
+
 def get_verification_service() -> VerificationService:
     provider_type = (settings.VERIFICATION_PROVIDER or "mock").lower()
     if provider_type == "redirect":
