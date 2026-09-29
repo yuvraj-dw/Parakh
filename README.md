@@ -19,6 +19,14 @@
 
 ---
 
+## Product Tour & Walkthrough
+
+<p align="center">
+  <img src="assets/parakh-preview.gif" alt="Parakh Architecture & Product Walkthrough" width="100%" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.25);" />
+</p>
+
+---
+
 ## Overview
 
 **Parakh** is an enterprise-grade AI orchestration and regulatory compliance platform engineered for the **Bureau of Indian Standards (BIS)**. It unifies Indian Standards discovery, statutory Quality Control Orders (QCOs), testing laboratory networks, hallmarking verification, and anti-counterfeit whistleblower reporting into a high-performance asynchronous API architecture.
@@ -200,4 +208,4 @@ pytest -v
 
 - **Frontend & RAG Integration Guide (PDF)**: Publicly served live at [https://bis.hizru.me/guide.pdf](https://bis.hizru.me/guide.pdf) (7-page comprehensive reference including data schemas, mock registries, and error codes).
 - **Interactive Swagger Documentation**: [https://bis.hizru.me/docs](https://bis.hizru.me/docs).
-- **System Architecture & Specifications**: Detailed engineering plans and architectural diagrams are located in `docs/`.
+
