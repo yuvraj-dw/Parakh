@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,7 +15,6 @@ from app.dependencies import (
 from app.models.knowledge_gap import KnowledgeGap
 from app.models.sync import SyncError, SyncRun
 from app.models.user import User
-from app.schemas.common import PaginatedResponse, PaginationMeta
 from app.services.sync_service import SyncService
 
 router = APIRouter(prefix="/admin", tags=["Admin Operations"])
@@ -194,13 +193,20 @@ async def get_source_health(
 
 @router.get("/gap-report")
 async def get_gap_report(
+    limit: int = 100,
+    offset: int = 0,
     db: AsyncSession = Depends(get_db),
     admin: User = Depends(require_admin),
-):
+) -> dict[str, Any]:
     count_stmt = select(func.count()).select_from(KnowledgeGap)
     count = (await db.execute(count_stmt)).scalar() or 0
 
-    stmt = select(KnowledgeGap).order_by(KnowledgeGap.frequency.desc())
+    stmt = (
+        select(KnowledgeGap)
+        .order_by(KnowledgeGap.frequency.desc())
+        .offset(offset)
+        .limit(limit)
+    )
     records = (await db.execute(stmt)).scalars().all()
 
     items = [
@@ -210,7 +216,7 @@ async def get_gap_report(
             "retrieval_score": gap.retrieval_score,
             "category": gap.category,
             "frequency": gap.frequency,
-            "created_at": gap.created_at,
+            "created_at": gap.created_at.isoformat() if gap.created_at else None,
         }
         for gap in records
     ]

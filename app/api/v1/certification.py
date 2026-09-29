@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy import select
@@ -11,6 +12,8 @@ from app.models.knowledge_gap import KnowledgeGap
 from app.models.product import Product, ProductStandardMapping
 from app.models.qco import QCO
 from app.models.standard import Standard
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/certification", tags=["Certification Schemes"])
 
@@ -183,18 +186,23 @@ async def map_product(
                 "rejected_alternatives": generate_rejected_alternatives(candidate_standard),
             }
 
-    gap_stmt = select(KnowledgeGap).where(KnowledgeGap.query_text == payload.description)
-    existing_gap = (await db.execute(gap_stmt)).scalar_one_or_none()
-    if existing_gap:
-        existing_gap.frequency += 1
-    else:
-        new_gap = KnowledgeGap(
-            query_text=payload.description,
-            retrieval_score=0.0,
-            category="PRODUCT_MAPPING",
-        )
-        db.add(new_gap)
-    await db.commit()
+    try:
+        normalized_query = payload.description[:500]
+        gap_stmt = select(KnowledgeGap).where(KnowledgeGap.query_text == normalized_query)
+        existing_gap = (await db.execute(gap_stmt)).scalar_one_or_none()
+        if existing_gap:
+            existing_gap.frequency += 1
+        else:
+            new_gap = KnowledgeGap(
+                query_text=normalized_query,
+                retrieval_score=0.0,
+                category="PRODUCT_MAPPING",
+            )
+            db.add(new_gap)
+        await db.commit()
+    except Exception as e:
+        await db.rollback()
+        logger.warning("Failed to record knowledge gap: %s", e)
 
     candidate_standard = "IS 17803:2022"
     return {

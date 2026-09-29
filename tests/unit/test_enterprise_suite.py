@@ -422,6 +422,34 @@ async def test_knowledge_gap_model_and_admin_report(db_session):
         assert any(item["query_text"] == "completely unmatched alien gadget 9999" for item in data2["items"])
         alien_item = next(item for item in data2["items"] if item["query_text"] == "completely unmatched alien gadget 9999")
         assert alien_item["frequency"] == 2
+        assert isinstance(alien_item["created_at"], str)
+
+        # 5. Test long description truncation (>500 chars)
+        long_desc = "a" * 600
+        map_resp_long = await ac.post(
+            "/api/v1/certification/map-product",
+            json={"description": long_desc},
+        )
+        assert map_resp_long.status_code == 200
+
+        # 6. Test gap-report limit and offset pagination
+        paged_resp = await ac.get(
+            "/api/v1/admin/gap-report?limit=1&offset=0",
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert paged_resp.status_code == 200
+        paged_data = paged_resp.json()
+        assert len(paged_data["items"]) == 1
+        assert paged_data["total_gaps_logged"] >= 2
+
+        offset_resp = await ac.get(
+            "/api/v1/admin/gap-report?limit=1&offset=1",
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert offset_resp.status_code == 200
+        offset_data = offset_resp.json()
+        assert len(offset_data["items"]) == 1
+        assert offset_data["items"][0]["id"] != paged_data["items"][0]["id"]
 
 
 
