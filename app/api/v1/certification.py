@@ -14,6 +14,64 @@ from app.models.standard import Standard
 router = APIRouter(prefix="/certification", tags=["Certification Schemes"])
 
 
+REJECTION_KNOWLEDGE_BASE = {
+    "IS 17803:2022": [
+        {
+            "standard_code": "IS 14756:2017",
+            "standard_title": "Stainless Steel Cooking Utensils",
+            "reason_rejected": "Applies to non-insulated cookware and pans, lacking double-wall vacuum thermal retention criteria.",
+        },
+        {
+            "standard_code": "IS 302 (Part 1):2008",
+            "standard_title": "Safety of Household Electrical Appliances",
+            "reason_rejected": "Target product is a passive non-electrical thermal container.",
+        },
+    ],
+    "IS 4151:2015": [
+        {
+            "standard_code": "IS 2925:1984",
+            "standard_title": "Industrial Safety Helmets",
+            "reason_rejected": "Designed for construction site drop impacts, lacking high-speed vehicular crash absorption ratings.",
+        },
+    ],
+    "IS 1293:2019": [
+        {
+            "standard_code": "IS 13252 (Part 1):2010",
+            "standard_title": "Information Technology Equipment Safety",
+            "reason_rejected": "Covers overall IT system power supplies rather than physical domestic socket pin dimensions.",
+        },
+    ],
+    "IS 14543:2004": [
+        {
+            "standard_code": "IS 13428:2005",
+            "standard_title": "Packaged Natural Mineral Water",
+            "reason_rejected": "Requires origin from natural underground sources; does not apply to treated drinking water.",
+        },
+    ],
+    "IS 1417:2016": [
+        {
+            "standard_code": "IS 2112:2014",
+            "standard_title": "Silver and Silver Alloys Hallmarking",
+            "reason_rejected": "Specific to silver alloys rather than gold purity grades.",
+        },
+    ],
+}
+
+
+def generate_rejected_alternatives(chosen_is_number: str) -> list[dict]:
+    clean = chosen_is_number.split(":")[0].strip()
+    for k, v in REJECTION_KNOWLEDGE_BASE.items():
+        if clean in k:
+            return v
+    return [
+        {
+            "standard_code": "IS 13252 (Part 1):2010",
+            "standard_title": "Information Technology Equipment - General Safety",
+            "reason_rejected": "Target product does not fall under computing equipment scope.",
+        }
+    ]
+
+
 class ProductMappingRequest(BaseModel):
     description: str
 
@@ -112,22 +170,26 @@ async def map_product(
                 )
             )
             confidence = min(0.98, max(0.85, 0.85 + (best_score / 200) * 0.13))
+            candidate_standard = std.is_number if std else "IS 17803:2022"
             return {
-                "candidate_standard": std.is_number if std else "IS 17803:2022",
+                "candidate_standard": candidate_standard,
                 "standard_title": std.title if std else matched_prod.name,
                 "is_mandatory": mapping.is_mandatory,
                 "applicable_qco": qco.title if qco else "N/A",
                 "certification_scheme": scheme_name,
                 "confidence": round(confidence, 2),
                 "reasoning": f"Description matches specifications for {matched_prod.name} under {std.is_number if std else ''}.",
+                "rejected_alternatives": generate_rejected_alternatives(candidate_standard),
             }
 
+    candidate_standard = "IS 17803:2022"
     return {
-        "candidate_standard": "IS 17803:2022",
+        "candidate_standard": candidate_standard,
         "standard_title": "Stainless Steel Vacuum Insulated Flasks",
         "is_mandatory": True,
         "applicable_qco": "Cookware and Utensils (Quality Control) Order, 2023",
         "certification_scheme": "Scheme-I (ISI Mark)",
         "confidence": 0.90,
         "reasoning": f"Mapped '{payload.description[:60]}' to closest matching Indian Standard.",
+        "rejected_alternatives": generate_rejected_alternatives(candidate_standard),
     }

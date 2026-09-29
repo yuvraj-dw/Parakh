@@ -5,6 +5,7 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 from app.api.v1.laboratories import calculate_haversine_distance
 from app.api.v1.qco import compute_qco_enforcement_details
+from app.api.v1.certification import generate_rejected_alternatives
 from app.api.v1.chat import ChatRequest
 from app.main import app
 from app.models.laboratory import Laboratory
@@ -174,6 +175,37 @@ async def test_chat_endpoint_with_persona():
         data = resp.json()
         assert "answer" in data
         assert "conversation_id" in data
+
+
+def test_generate_rejected_alternatives():
+    alts_17803 = generate_rejected_alternatives("IS 17803:2022")
+    assert len(alts_17803) >= 1
+    codes_17803 = [a["standard_code"] for a in alts_17803]
+    assert "IS 14756:2017" in codes_17803
+
+    alts_4151 = generate_rejected_alternatives("IS 4151:2015")
+    codes_4151 = [a["standard_code"] for a in alts_4151]
+    assert "IS 2925:1984" in codes_4151
+
+    alts_unknown = generate_rejected_alternatives("IS 99999:9999")
+    assert len(alts_unknown) >= 1
+    assert alts_unknown[0]["standard_code"] == "IS 13252 (Part 1):2010"
+    assert "computing equipment" in alts_unknown[0]["reason_rejected"].lower()
+
+
+@pytest.mark.asyncio
+async def test_map_product_endpoint_includes_rejected_alternatives():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        resp = await ac.post(
+            "/api/v1/certification/map-product",
+            json={"description": "stainless steel vacuum flask"},
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "rejected_alternatives" in data
+        assert isinstance(data["rejected_alternatives"], list)
+        assert len(data["rejected_alternatives"]) > 0
+
 
 
 
