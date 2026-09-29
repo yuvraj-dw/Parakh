@@ -200,4 +200,4 @@ pytest -v
 
 - **Frontend & RAG Integration Guide (PDF)**: Publicly served live at [https://bis.hizru.me/guide.pdf](https://bis.hizru.me/guide.pdf) (7-page comprehensive reference including data schemas, mock registries, and error codes).
 - **Interactive Swagger Documentation**: [https://bis.hizru.me/docs](https://bis.hizru.me/docs).
-- **System Architecture & Feature Catalogue**: Located under `C:\Users\yuvra\Downloads\BIS_Project_Documentation\`.
+- **System Architecture & Specifications**: Detailed engineering plans and architectural diagrams are located in `docs/`.
