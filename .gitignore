@@ -20,5 +20,6 @@ setup_ssl.py
 sync_to_vps.py
 *.json.backup
 brag-output/
+*.pdf
 
 

@@ -183,6 +183,9 @@ async def test_jewellery_scan_endpoint():
         assert data["detected_fineness"] == "916"
         assert data["detected_bis_logo"] is True
         assert data["confidence_score"] >= 0.9
+        assert data["hallmark_present"] is True
+        assert data["hallmark_standard"] == "INDIAN_BIS"
+        assert len(data["detected_marks"]) > 0
 
 
 @pytest.mark.asyncio

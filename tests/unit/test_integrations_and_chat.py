@@ -94,6 +94,10 @@ async def test_mock_vision_jewellery_scan():
     assert result.detected_fineness == "916"
     assert result.detected_bis_logo is True
     assert result.confidence_score >= 0.9
+    assert result.hallmark_present is True
+    assert result.hallmark_standard == "INDIAN_BIS"
+    assert len(result.detected_marks) > 0
+    assert result.explanation is not None
 
 
 @pytest.mark.asyncio
@@ -103,6 +107,8 @@ async def test_mock_vision_jewellery_scan_empty():
     assert result.detected_huid is None
     assert result.detected_bis_logo is False
     assert result.confidence_score == 0.0
+    assert result.hallmark_present is False
+    assert result.hallmark_standard is None
 
 
 @pytest.mark.asyncio

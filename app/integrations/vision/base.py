@@ -10,6 +10,10 @@ class JewelleryScanDetection(BaseModel):
     detected_fineness: Optional[str] = None
     detected_bis_logo: bool = False
     confidence_score: float = Field(default=0.0, ge=0.0, le=1.0)
+    hallmark_present: bool = False
+    hallmark_standard: Optional[str] = None
+    detected_marks: list[str] = Field(default_factory=list)
+    explanation: Optional[str] = None
 
 
 class AssayReportData(BaseModel):

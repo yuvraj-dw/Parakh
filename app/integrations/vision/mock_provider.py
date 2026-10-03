@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
 from app.integrations.vision.base import (
     AssayReportData,
     BaseVisionProvider,
@@ -16,6 +15,10 @@ class MockVisionProvider(BaseVisionProvider):
                 detected_fineness=None,
                 detected_bis_logo=False,
                 confidence_score=0.0,
+                hallmark_present=False,
+                hallmark_standard=None,
+                detected_marks=[],
+                explanation="No image data provided for hallmark inspection.",
             )
 
         return JewelleryScanDetection(
@@ -23,6 +26,10 @@ class MockVisionProvider(BaseVisionProvider):
             detected_fineness="916",
             detected_bis_logo=True,
             confidence_score=0.95,
+            hallmark_present=True,
+            hallmark_standard="INDIAN_BIS",
+            detected_marks=["BIS Standard Mark", "22K916", "ABC123"],
+            explanation="Authentic Indian BIS hallmarking detected with official triangular mark, 916 fineness, and HUID ABC123.",
         )
 
     async def parse_assay_report(self, file_bytes: bytes, mime_type: str) -> AssayReportData:

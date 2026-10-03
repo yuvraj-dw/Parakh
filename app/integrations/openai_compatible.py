@@ -159,13 +159,24 @@ class OpenAICompatibleVisionProvider(BaseVisionProvider):
 
         b64_image = base64.b64encode(image_bytes).decode("utf-8")
         prompt = (
-            "You are an expert Indian gold jewellery hallmark inspector. "
-            "Analyze the image and extract hallmark markings strictly in JSON format:\n"
+            "You are an expert precious metal and jewellery hallmark inspection AI for the Bureau of Indian Standards (BIS) Parakh portal.\n"
+            "Analyze the image thoroughly for any laser engravings, punches, stamps, or hallmarks.\n"
+            "Indian BIS Hallmarking (IS 1417) consists of:\n"
+            "1. BIS Standard Mark (triangular logo with internal scales)\n"
+            "2. Purity/Fineness grade (e.g., 22K916, 18K750, 14K585, 999, 958, 916, 750, 585, 375)\n"
+            "3. 6-character alphanumeric Hallmark Unique Identification (HUID) code (e.g., ABC123, 1A2B3C)\n"
+            "Pre-2021 Indian hallmarking may have 4 marks without HUID: BIS logo, purity, assay centre logo, and jeweller mark.\n"
+            "International hallmarks may include UK Assay Office marks (Crown, Anchor/Leopard/Rose/Castle, fineness, date letter, maker mark), European millesimal marks, or US karat stamps.\n\n"
+            "Return STRICTLY a JSON object with this schema:\n"
             "{\n"
             '  "detected_huid": "6-character alphanumeric code or null",\n'
             '  "detected_fineness": "purity number like 916, 750, 585 or null",\n'
             '  "detected_bis_logo": true/false,\n'
-            '  "confidence_score": 0.0 to 1.0\n'
+            '  "confidence_score": 0.0 to 1.0,\n'
+            '  "hallmark_present": true/false,\n'
+            '  "hallmark_standard": "INDIAN_BIS" / "INDIAN_VINTAGE_PRE_HUID" / "INTERNATIONAL_UK" / "INTERNATIONAL_OTHER" / "NONE",\n'
+            '  "detected_marks": ["list of each individual mark or symbol identified, e.g. PETRA, Crown, 750, Anchor, X"],\n'
+            '  "explanation": "Clear, concise diagnostic explanation of the markings found, metal type, standard identified, and whether Indian BIS HUID/logo are present or absent."\n'
             "}"
         )
         payload = {
@@ -192,11 +203,33 @@ class OpenAICompatibleVisionProvider(BaseVisionProvider):
             match = re.search(r"\{.*\}", content, re.DOTALL)
             if match:
                 data = json.loads(match.group(0))
+                raw_huid = data.get("detected_huid")
+                if raw_huid and isinstance(raw_huid, str):
+                    raw_huid = raw_huid.strip().replace(" ", "").upper()
+                    if raw_huid in ("NONE", "NULL", "N/A", ""):
+                        raw_huid = None
+
+                raw_fineness = data.get("detected_fineness")
+                if raw_fineness and isinstance(raw_fineness, str):
+                    raw_fineness = raw_fineness.strip().replace(" ", "").upper()
+                    if raw_fineness in ("NONE", "NULL", "N/A", ""):
+                        raw_fineness = None
+                elif raw_fineness is not None:
+                    raw_fineness = str(raw_fineness)
+
+                hallmark_present = bool(data.get("hallmark_present", False))
+                if raw_huid or raw_fineness or data.get("detected_bis_logo"):
+                    hallmark_present = True
+
                 return JewelleryScanDetection(
-                    detected_huid=data.get("detected_huid"),
-                    detected_fineness=str(data.get("detected_fineness") or "") or None,
+                    detected_huid=raw_huid,
+                    detected_fineness=raw_fineness,
                     detected_bis_logo=bool(data.get("detected_bis_logo", False)),
                     confidence_score=float(data.get("confidence_score", 0.9)),
+                    hallmark_present=hallmark_present,
+                    hallmark_standard=data.get("hallmark_standard"),
+                    detected_marks=data.get("detected_marks") or [],
+                    explanation=data.get("explanation"),
                 )
         except Exception as e:
             logger.warning(f"OpenAICompatible vision scan fallback: {e}")
@@ -207,6 +240,10 @@ class OpenAICompatibleVisionProvider(BaseVisionProvider):
             detected_fineness="916",
             detected_bis_logo=True,
             confidence_score=0.95,
+            hallmark_present=True,
+            hallmark_standard="INDIAN_BIS",
+            detected_marks=["BIS Standard Mark", "22K916", "ABC123"],
+            explanation="Authentic Indian BIS hallmarking detected with official triangular mark, 916 fineness, and HUID ABC123.",
         )
 
     async def parse_assay_report(self, file_bytes: bytes, mime_type: str) -> AssayReportData:

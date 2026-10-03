@@ -90,6 +90,8 @@ async def test_openai_compatible_vision_provider_offline_fallback():
     assert scan_res.detected_huid == "ABC123"
     assert scan_res.detected_fineness == "916"
     assert scan_res.detected_bis_logo is True
+    assert scan_res.hallmark_present is True
+    assert scan_res.hallmark_standard == "INDIAN_BIS"
 
     # Assay report fallback
     assay_res = await vision.parse_assay_report(b"fake_pdf_bytes", "application/pdf")
